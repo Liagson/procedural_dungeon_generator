@@ -47,7 +47,6 @@ namespace DungeonGenerator {
                 }
             }
         }
-
     }
 
 
@@ -66,10 +65,27 @@ namespace DungeonGenerator {
         }
 
         static public bool detect2RoomCollision(Room room_A, Room room_B) {
-            return (isPointInsideRoom(room_A.position_x, room_A.position_y, room_B) ||
-                isPointInsideRoom(room_A.position_x + room_A.width - 1, room_A.position_y, room_B) ||
-                isPointInsideRoom(room_A.position_x, room_A.position_y + room_A.height - 1, room_B) ||
-                isPointInsideRoom(room_A.position_x + room_A.width - 1, room_A.position_y + room_A.height - 1, room_B));
+            if (!(isPointInsideRoom(room_A.position_x, room_A.position_y, room_B) ||
+                isPointInsideRoom(room_A.position_x + room_A.width, room_A.position_y, room_B) ||
+                isPointInsideRoom(room_A.position_x, room_A.position_y + room_A.height, room_B) ||
+                isPointInsideRoom(room_A.position_x + room_A.width, room_A.position_y + room_A.height, room_B))){
+
+                /* Check if they are adjacent by the inside */
+
+                //Vertially adjacent
+                if ((room_A.height == room_B.height) && (room_A.position_y == room_B.position_y)) {
+                    if (((room_B.position_x <= room_A.position_x) && (room_A.position_x < room_B.position_x))
+                        || ((room_B.position_x <= room_A.position_x + room_A.width) && (room_A.position_x + room_A.width < room_B.position_x)))
+                        return true;
+                }
+                //Horizontally adjacent
+                else if ((room_A.width == room_B.width) && (room_A.position_x == room_B.position_x)) {
+                    if (((room_B.position_y <= room_A.position_y) && (room_A.position_y < room_B.position_y))
+                    || ((room_B.position_y <= room_A.position_y + room_A.height) && (room_A.position_y + room_A.height < room_B.position_y)))
+                        return true;
+                } else return false;
+            }
+            return true;
         }
 
         static public bool isPointInsideRoom(int x, int y, Room room) {
