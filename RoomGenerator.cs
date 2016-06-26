@@ -65,30 +65,12 @@ namespace DungeonGenerator {
         }
 
         static public bool detect2RoomCollision(Room room_A, Room room_B) {
-            if (!(isPointInsideRoom(room_A.position_x, room_A.position_y, room_B) ||
-                isPointInsideRoom(room_A.position_x + room_A.width, room_A.position_y, room_B) ||
-                isPointInsideRoom(room_A.position_x, room_A.position_y + room_A.height, room_B) ||
-                isPointInsideRoom(room_A.position_x + room_A.width, room_A.position_y + room_A.height, room_B))){
-
-                /* Check if they are adjacent by the inside */
-
-                //Vertially adjacent
-                if ((room_A.height == room_B.height) && (room_A.position_y == room_B.position_y)) {
-                    if (((room_B.position_x <= room_A.position_x) && (room_A.position_x < room_B.position_x))
-                        || ((room_B.position_x <= room_A.position_x + room_A.width) && (room_A.position_x + room_A.width < room_B.position_x)))
-                        return true;
-                }
-                //Horizontally adjacent
-                else if ((room_A.width == room_B.width) && (room_A.position_x == room_B.position_x)) {
-                    if (((room_B.position_y <= room_A.position_y) && (room_A.position_y < room_B.position_y))
-                    || ((room_B.position_y <= room_A.position_y + room_A.height) && (room_A.position_y + room_A.height < room_B.position_y)))
-                        return true;
-                } else return false;
-            }
-            return true;
+            return ((room_A.position_x + room_A.width > room_B.position_x) && (room_A.position_x < room_B.position_x + room_B.width)
+                && (room_A.position_y + room_A.height > room_B.position_y) && (room_A.position_y < room_B.position_y + room_B.height));
         }
 
         static public bool isPointInsideRoom(int x, int y, Room room) {
+            /*If it touches the wall it's not inside */
             return ((y > room.position_y) &&
                     (y < room.position_y + room.height) &&
                     (x > room.position_x) &&
@@ -152,7 +134,10 @@ namespace DungeonGenerator {
                         for (int x = room.position_x; x < room.width + room.position_x; x++) {
                             if (room.floor[tile_positon].up == 1 || room.floor[tile_positon].down == 1 ||
                                 room.floor[tile_positon].left == 1 || room.floor[tile_positon].right == 1)
-                                Gizmos.color = Color.black;
+                                Gizmos.color = Color.black; //Wall
+                            else if (room.floor[tile_positon].up == 2 || room.floor[tile_positon].down == 2 ||
+                                room.floor[tile_positon].left == 2 || room.floor[tile_positon].right == 2)
+                                Gizmos.color = Color.yellow; //Doors
                             else Gizmos.color = Color.white;
                             Vector3 pos = new Vector3(-1 / 2 + x + .5f, 0, -1 / 2 + y + .5f);
                             Gizmos.DrawCube(pos, Vector3.one);
