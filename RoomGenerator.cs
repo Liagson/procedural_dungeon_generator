@@ -74,24 +74,24 @@ namespace DungeonGenerator {
                 child_length = Navigation.pseudoRandom.Next(5, 20);
                 switch (direction) {
                     case 0:
-                        tile_with_door = Navigation.pseudoRandom.Next(1, this.width - 1);
-                        pos_x_son = Navigation.pseudoRandom.Next(this.position_x + tile_with_door - child_length  - 1 , this.position_x + tile_with_door - 1);
+                        tile_with_door = Navigation.pseudoRandom.Next(1, this.width - 2);
+                        pos_x_son = Navigation.pseudoRandom.Next(this.position_x + tile_with_door - child_length  + 1 , this.position_x + tile_with_door - 1);
                         pos_y_son = this.position_y;
                         break;
                     case 1:
-                        tile_with_door = Navigation.pseudoRandom.Next(1, this.height - 1);
+                        tile_with_door = Navigation.pseudoRandom.Next(1, this.height - 2);
                         pos_x_son = this.position_x + this.width;
-                        pos_y_son = Navigation.pseudoRandom.Next(this.position_y + tile_with_door - child_height - 1, this.position_y + tile_with_door - 1);
+                        pos_y_son = Navigation.pseudoRandom.Next(this.position_y + tile_with_door - child_height + 1, this.position_y + tile_with_door - 1);
                         break;
                     case 2:
-                        tile_with_door = Navigation.pseudoRandom.Next(1, this.width - 1);
-                        pos_x_son = Navigation.pseudoRandom.Next(this.position_x + tile_with_door - child_length - 1, this.position_x + tile_with_door - 1);
+                        tile_with_door = Navigation.pseudoRandom.Next(1, this.width - 2);
+                        pos_x_son = Navigation.pseudoRandom.Next(this.position_x + tile_with_door - child_length + 1, this.position_x + tile_with_door - 1);
                         pos_y_son = this.position_y + this.height;
                         break;
                     case 3:
-                        tile_with_door = Navigation.pseudoRandom.Next(1, this.height - 1);
+                        tile_with_door = Navigation.pseudoRandom.Next(1, this.height - 2);
                         pos_x_son = this.position_x - this.width;
-                        pos_y_son = Navigation.pseudoRandom.Next(this.position_y + tile_with_door - child_height - 1, this.position_y + tile_with_door - 1);
+                        pos_y_son = Navigation.pseudoRandom.Next(this.position_y + tile_with_door - child_height + 1, this.position_y + tile_with_door - 1);
                         break;
                 }
                 child_room = new Room(pos_x_son, pos_y_son, child_height, child_length);
