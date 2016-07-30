@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System;
 
 namespace DungeonGenerator {
 
@@ -54,8 +55,8 @@ namespace DungeonGenerator {
 
         public void create_child_room() {
             int direction;
+            int child_width;
             int child_height;
-            int child_length;
             int tile_with_door = 0;
 
             int pos_x_son = 0;
@@ -70,13 +71,13 @@ namespace DungeonGenerator {
 
             do {
                 direction = Navigation.getDirection();
+                child_width = Navigation.pseudoRandom.Next(5, 20);
                 child_height = Navigation.pseudoRandom.Next(5, 20);
-                child_length = Navigation.pseudoRandom.Next(5, 20);
                 switch (direction) {
                     case 0:
                         tile_with_door = Navigation.pseudoRandom.Next(1, this.width - 2);
-                        pos_x_son = Navigation.pseudoRandom.Next(this.position_x + tile_with_door - child_length  + 1 , this.position_x + tile_with_door - 1);
-                        pos_y_son = this.position_y;
+                        pos_x_son = Navigation.pseudoRandom.Next(this.position_x + tile_with_door - child_width + 1 , this.position_x + tile_with_door - 1);
+                        pos_y_son = this.position_y - child_height;
                         break;
                     case 1:
                         tile_with_door = Navigation.pseudoRandom.Next(1, this.height - 2);
@@ -85,16 +86,16 @@ namespace DungeonGenerator {
                         break;
                     case 2:
                         tile_with_door = Navigation.pseudoRandom.Next(1, this.width - 2);
-                        pos_x_son = Navigation.pseudoRandom.Next(this.position_x + tile_with_door - child_length + 1, this.position_x + tile_with_door - 1);
+                        pos_x_son = Navigation.pseudoRandom.Next(this.position_x + tile_with_door - child_width + 1, this.position_x + tile_with_door - 1);
                         pos_y_son = this.position_y + this.height;
                         break;
                     case 3:
                         tile_with_door = Navigation.pseudoRandom.Next(1, this.height - 2);
-                        pos_x_son = this.position_x - this.width;
+                        pos_x_son = this.position_x - child_width;
                         pos_y_son = Navigation.pseudoRandom.Next(this.position_y + tile_with_door - child_height + 1, this.position_y + tile_with_door - 1);
                         break;
                 }
-                child_room = new Room(pos_x_son, pos_y_son, child_height, child_length);
+                child_room = new Room(pos_x_son, pos_y_son, child_height, child_width);
                 child_room.id = Dungeon.rooms_in_dungeon.Count;
                 child_room.depth = this.depth + 1;
 
@@ -116,11 +117,11 @@ namespace DungeonGenerator {
                         break;
                     case 2:
                         CollisionDetection.setDoorInRoom(this, direction, position_x + tile_with_door, position_y + height - 1);
-                        CollisionDetection.setDoorInRoom(child_room, (direction + 2) % 4, position_x + tile_with_door, position_y + 1);
+                        CollisionDetection.setDoorInRoom(child_room, (direction + 2) % 4, position_x + tile_with_door, position_y + this.height);
                         break;
                     case 3:
                         CollisionDetection.setDoorInRoom(this, direction, position_x, position_y + tile_with_door);
-                        CollisionDetection.setDoorInRoom(child_room, (direction + 2) % 4, position_x, position_y + tile_with_door);
+                        CollisionDetection.setDoorInRoom(child_room, (direction + 2) % 4, position_x - 1, position_y + tile_with_door);
                         break;
                 }                
                 Dungeon.rooms_in_dungeon.Add(child_room);
@@ -194,60 +195,23 @@ namespace DungeonGenerator {
         }
 
         static public void setDoorInRoom(Room room, int direction, int x_position, int y_position) {
-            /* x and y positions refer to the adjacent room tile with door */
             int tile_with_door;
-
+            tile_with_door = Math.Abs(room.position_x - x_position) + (Math.Abs(room.position_y - y_position) * room.width);
             switch (direction) {
                 case 0:
-                    tile_with_door = (x_position - room.position_x) + ((y_position) - room.position_y) * room.width;
                     room.floor[tile_with_door].up = 2;
                     break;
                 case 1:
-                    tile_with_door = ((x_position) - room.position_x) + (y_position - room.position_y) * room.width;
                     room.floor[tile_with_door].right = 2;
                     break;
                 case 2:
-                    tile_with_door = (x_position - room.position_x) + ((y_position) - room.position_y) * room.width;
                     room.floor[tile_with_door].down = 2;
                     break;
                 case 3:
-                    tile_with_door = ((x_position) - room.position_x) + (y_position - room.position_y) * room.width;
                     room.floor[tile_with_door].left = 2;
                     break;
             }
         }
-
-        static public int getRandomTileInBorderOfRoom(Room room, System.Random pseudoRandom, int direction) {
-            /* Returns room's tile with door position
-             * Also adds a door to said tile */
-
-            int depth;
-            int selected_tile_with_door = -1;
-            switch (direction) {
-                case 0: //UP
-                    depth = pseudoRandom.Next(1, room.width - 1);
-                    selected_tile_with_door = depth;
-                    room.floor[selected_tile_with_door].up = 2;
-                    break;
-                case 1: //RIGHT
-                    depth = pseudoRandom.Next(1, room.height - 1);
-                    selected_tile_with_door = (room.width * (depth + 1)) - 1;
-                    room.floor[selected_tile_with_door].right = 2;
-                    break;
-                case 2: //DOWN
-                    depth = pseudoRandom.Next(1, room.width - 1);
-                    selected_tile_with_door = (room.width * (room.height - 1)) + depth;
-                    room.floor[selected_tile_with_door].down = 2;
-                    break;
-                case 3: //LEFT
-                    depth = pseudoRandom.Next(1, room.height - 1);
-                    selected_tile_with_door = room.width * depth;
-                    room.floor[selected_tile_with_door].left = 2;
-                    break;
-            }
-            return selected_tile_with_door;
-        }
-
     }
 
     public class RoomGenerator : MonoBehaviour {
@@ -270,7 +234,11 @@ namespace DungeonGenerator {
             Dungeon.rooms_in_dungeon[0].reproduct();
             Dungeon.rooms_in_dungeon[1].reproduct();
             Dungeon.rooms_in_dungeon[2].reproduct();
+            Dungeon.rooms_in_dungeon[2].reproduct();
             Dungeon.rooms_in_dungeon[3].reproduct();
+            Dungeon.rooms_in_dungeon[0].reproduct();
+            Dungeon.rooms_in_dungeon[0].reproduct();
+            Dungeon.rooms_in_dungeon[0].reproduct();
             Dungeon.rooms_in_dungeon[1].reproduct();
             Dungeon.rooms_in_dungeon[2].reproduct();
             Dungeon.rooms_in_dungeon[2].reproduct();
