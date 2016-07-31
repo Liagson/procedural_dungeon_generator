@@ -177,18 +177,10 @@ namespace DungeonGenerator {
             return ((room_A.position_x + room_A.width > room_B.position_x) && (room_A.position_x < room_B.position_x + room_B.width)
                 && (room_A.position_y + room_A.height > room_B.position_y) && (room_A.position_y < room_B.position_y + room_B.height));
         }
-
-        static public bool isPointInsideRoom(int x, int y, Room room) {
-            /*If it touches the wall it's not inside */
-            return ((y > room.position_y) &&
-                    (y < room.position_y + room.height) &&
-                    (x > room.position_x) &&
-                    (x < room.position_x + room.width));
-        }
-
-        static public void setDoorInRoom(Room room, int direction, int x_position, int y_position) {
+                
+        static public void setDoorInRoom(Room room, int direction, int son_x_position, int son_y_position) {
             int tile_with_door;
-            tile_with_door = Math.Abs(room.position_x - x_position) + (Math.Abs(room.position_y - y_position) * room.width);
+            tile_with_door = Math.Abs(room.position_x - son_x_position) + (Math.Abs(room.position_y - son_y_position) * room.width);
             switch (direction) {
                 case 0:
                     room.floor[tile_with_door].up = 2;
@@ -201,6 +193,40 @@ namespace DungeonGenerator {
                     break;
                 case 3:
                     room.floor[tile_with_door].left = 2;
+                    break;
+            }
+        }
+
+        static public void linkRooms(Room room_A, Room room_B, int direction, System.Random pseudoRandom) {
+            /* room_A -> direction -> room_B */
+
+            int tile_x_position = 0;
+            int min_x_position = Math.Min(room_A.position_x, room_B.position_x);
+            int max_x_position = Math.Max(room_A.position_x + room_A.width, room_B.position_x + room_B.width);
+
+            int tile_y_position = 0;
+            int min_y_position = Math.Min(room_A.position_y, room_B.position_y);
+            int max_y_position = Math.Max(room_A.position_y + room_A.height, room_B.position_y + room_B.height);
+                     
+            tile_x_position = pseudoRandom.Next(min_x_position + 1, max_x_position - 1);
+            tile_y_position = pseudoRandom.Next(min_y_position + 1, max_y_position - 1);
+                        
+            switch (direction) {
+                case 0:
+                    setDoorInRoom(room_A, 0, tile_x_position, room_A.position_y);
+                    setDoorInRoom(room_B, 2, tile_x_position, room_A.position_y - 1);
+                    break;
+                case 1:
+                    setDoorInRoom(room_A, 1, room_B.position_x - 1, tile_y_position);
+                    setDoorInRoom(room_B, 3, room_B.position_x, tile_y_position);
+                    break;
+                case 2:
+                    setDoorInRoom(room_A, 2, tile_x_position, room_B.position_y - 1);
+                    setDoorInRoom(room_B, 0, tile_x_position, room_B.position_y);
+                    break;
+                case 3:
+                    setDoorInRoom(room_A, 3, room_A.position_x, tile_y_position);
+                    setDoorInRoom(room_B, 1, room_A.position_x - 1, tile_y_position);
                     break;
             }
         }
