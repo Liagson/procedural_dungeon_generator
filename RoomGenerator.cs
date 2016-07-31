@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 using System;
 
@@ -41,15 +40,11 @@ namespace DungeonGenerator {
         }
 
         public void reproduct() {
-            //Finish this mess
             if (this.depth != 0 && this.depth < 4) {
                 create_child_room();
-                //create_child_room();
-            } else {
+            } else { /*Two paths in the starting room */
                 create_child_room();
-                //Dungeon.rooms_in_dungeon[(Dungeon.rooms_in_dungeon.Count) - 1].create_child_room();
-                //create_child_room();
-                //Dungeon.rooms_in_dungeon[(Dungeon.rooms_in_dungeon.Count) - 1].create_child_room();
+                create_child_room();
             }
         }
 
@@ -146,9 +141,6 @@ namespace DungeonGenerator {
     }
 
     public class Dungeon {
-        /* Add a dictionary of a Room List 
-            or maybe an int dictionary and then a room list
-         */
         public static List<Room> rooms_in_dungeon = new List<Room>();
         public void initializeDungeon() {
             Room first_room = new Room(0, 0, 5, 10);
@@ -216,11 +208,7 @@ namespace DungeonGenerator {
 
     public class RoomGenerator : MonoBehaviour {
 
-        public string seed;
-        public int number_of_rooms;
-
-        private List<Room> room_list = new List<Room>();
-                        
+        public string seed;                        
         public Dungeon dungeon = new Dungeon();
         
         // Use this for initialization
@@ -229,20 +217,14 @@ namespace DungeonGenerator {
         }
 
         public void buildRoom() {
+            int position = 0;
             Navigation.pseudoRandom = new System.Random(seed.GetHashCode());
             dungeon.initializeDungeon();
-            Dungeon.rooms_in_dungeon[0].reproduct();
-            Dungeon.rooms_in_dungeon[1].reproduct();
-            Dungeon.rooms_in_dungeon[2].reproduct();
-            Dungeon.rooms_in_dungeon[2].reproduct();
-            Dungeon.rooms_in_dungeon[3].reproduct();
-            Dungeon.rooms_in_dungeon[0].reproduct();
-            Dungeon.rooms_in_dungeon[0].reproduct();
-            Dungeon.rooms_in_dungeon[0].reproduct();
-            Dungeon.rooms_in_dungeon[1].reproduct();
-            Dungeon.rooms_in_dungeon[2].reproduct();
-            Dungeon.rooms_in_dungeon[2].reproduct();
-            Dungeon.rooms_in_dungeon[2].reproduct();
+
+            while (position < Dungeon.rooms_in_dungeon.Count && Dungeon.rooms_in_dungeon[position].depth < 5) {
+                Dungeon.rooms_in_dungeon[position].reproduct();
+                position++;
+            }
         }
 
         void OnDrawGizmos() {
