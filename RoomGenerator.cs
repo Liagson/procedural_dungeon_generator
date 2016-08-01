@@ -71,23 +71,23 @@ namespace DungeonGenerator {
                 switch (direction) {
                     case 0:
                         tile_with_door = Navigation.pseudoRandom.Next(1, this.width - 2);
-                        pos_x_son = Navigation.pseudoRandom.Next(this.position_x + tile_with_door - child_width + 1 , this.position_x + tile_with_door - 1);
+                        pos_x_son = Navigation.pseudoRandom.Next(this.position_x + tile_with_door - child_width + 2, this.position_x + tile_with_door - 1);
                         pos_y_son = this.position_y - child_height;
                         break;
                     case 1:
                         tile_with_door = Navigation.pseudoRandom.Next(1, this.height - 2);
                         pos_x_son = this.position_x + this.width;
-                        pos_y_son = Navigation.pseudoRandom.Next(this.position_y + tile_with_door - child_height + 1, this.position_y + tile_with_door - 1);
+                        pos_y_son = Navigation.pseudoRandom.Next(this.position_y + tile_with_door - child_height + 2, this.position_y + tile_with_door - 1);
                         break;
                     case 2:
                         tile_with_door = Navigation.pseudoRandom.Next(1, this.width - 2);
-                        pos_x_son = Navigation.pseudoRandom.Next(this.position_x + tile_with_door - child_width + 1, this.position_x + tile_with_door - 1);
+                        pos_x_son = Navigation.pseudoRandom.Next(this.position_x + tile_with_door - child_width + 2, this.position_x + tile_with_door - 1);
                         pos_y_son = this.position_y + this.height;
                         break;
                     case 3:
                         tile_with_door = Navigation.pseudoRandom.Next(1, this.height - 2);
                         pos_x_son = this.position_x - child_width;
-                        pos_y_son = Navigation.pseudoRandom.Next(this.position_y + tile_with_door - child_height + 1, this.position_y + tile_with_door - 1);
+                        pos_y_son = Navigation.pseudoRandom.Next(this.position_y + tile_with_door - child_height + 2, this.position_y + tile_with_door - 1);
                         break;
                 }
                 child_room = new Room(pos_x_son, pos_y_son, child_height, child_width);
@@ -177,7 +177,30 @@ namespace DungeonGenerator {
             return ((room_A.position_x + room_A.width > room_B.position_x) && (room_A.position_x < room_B.position_x + room_B.width)
                 && (room_A.position_y + room_A.height > room_B.position_y) && (room_A.position_y < room_B.position_y + room_B.height));
         }
-                
+
+        static public void connectAdjacentRooms(List<Room> room_list, System.Random pseudoRandom) {
+            int room_position = 0;
+            //Finish this mess
+            for (int x = 0; x < room_list.Count; x++) {
+                for (int current_position = room_position + 1; x < room_list.Count; x++) {
+                    if (room_list[room_position].position_y + room_list[room_position].height == room_list[current_position].position_y) {
+                        //Down
+                        if ((room_list[current_position].position_x < room_list[room_position].position_x + room_list[room_position].width) &&
+                            (room_list[current_position].position_x + room_list[current_position].width > room_list[room_position].position_x)) {
+                            linkRooms(room_list[room_position], room_list[current_position], 2, pseudoRandom);
+                        }
+                    }else if (room_list[room_position].position_x + room_list[room_position].width == room_list[current_position].position_x) {
+                        //Right
+                        if ((room_list[current_position].position_y < room_list[room_position].position_y + room_list[room_position].height) &&
+                            (room_list[current_position].position_y + room_list[current_position].height > room_list[room_position].position_y)) {
+                            linkRooms(room_list[room_position], room_list[current_position], 1, pseudoRandom);
+                        }
+                    }
+                }
+                room_position++;
+            }
+            
+        }
         static public void setDoorInRoom(Room room, int direction, int son_x_position, int son_y_position) {
             int tile_with_door;
             tile_with_door = Math.Abs(room.position_x - son_x_position) + (Math.Abs(room.position_y - son_y_position) * room.width);
@@ -251,6 +274,7 @@ namespace DungeonGenerator {
                 Dungeon.rooms_in_dungeon[position].reproduct();
                 position++;
             }
+            //CollisionDetection.connectAdjacentRooms(Dungeon.rooms_in_dungeon, Navigation.pseudoRandom);
         }
 
         void OnDrawGizmos() {
