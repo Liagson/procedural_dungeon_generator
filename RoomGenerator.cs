@@ -40,7 +40,7 @@ namespace DungeonGenerator {
         }
 
         public void reproduct() {
-            if (this.depth != 0 && this.depth < 5) {
+            if (this.depth != 0 && this.depth < 2) {
                 create_child_room();
             } else { /*Three paths in the starting room */
                 create_child_room();
@@ -180,28 +180,34 @@ namespace DungeonGenerator {
         }
 
         static public void connectAdjacentRooms(List<Room> room_list, System.Random pseudoRandom) {
-            int room_position = 0;
             //Finish this mess
-            for (int x = 0; x < room_list.Count - 1; x++) {
-                for (int current_position = room_position + 1; current_position < room_list.Count; current_position++) {
-                    if (room_list[room_position].position_y + room_list[room_position].height == room_list[current_position].position_y) {
-                        //Down
-                        if ((room_list[current_position].position_x < room_list[room_position].position_x + room_list[room_position].width) &&
-                            (room_list[current_position].position_x + room_list[current_position].width > room_list[room_position].position_x)) {
-                            linkRooms(room_list[room_position], room_list[current_position], 2, pseudoRandom);
+            for (int pivot_room = 0; pivot_room < room_list.Count - 1; pivot_room++) {
+                for (int current_position = 0; current_position < room_list.Count; current_position++) {
+                    if (current_position != pivot_room) {
+                        if (room_list[pivot_room].position_y + room_list[pivot_room].height == room_list[current_position].position_y) {
+                            //Down
+                            if ((room_list[current_position].position_x < room_list[pivot_room].position_x + room_list[pivot_room].width) &&
+                                (room_list[current_position].position_x + room_list[current_position].width > room_list[pivot_room].position_x)) {
+                                //Don't connect father-child rooms
+                                if ((!room_list[pivot_room].child_rooms.Contains(room_list[current_position].id)) && (!room_list[current_position].child_rooms.Contains(room_list[pivot_room].id))) {
+                                    linkRooms(room_list[pivot_room], room_list[current_position], 2, pseudoRandom);
+                                }
+                            }
+                        } else if (room_list[pivot_room].position_x + room_list[pivot_room].width == room_list[current_position].position_x) {
+                            //Right
+                            if ((room_list[current_position].position_y < room_list[pivot_room].position_y + room_list[pivot_room].height) &&
+                                (room_list[current_position].position_y + room_list[current_position].height > room_list[pivot_room].position_y)) {
+                                //Don't connect father-child rooms
+                                if ((!room_list[pivot_room].child_rooms.Contains(room_list[current_position].id)) && (!room_list[current_position].child_rooms.Contains(room_list[pivot_room].id))) {
+                                    linkRooms(room_list[pivot_room], room_list[current_position], 1, pseudoRandom);
+                                }
+                            }
                         }
-                    }else if (room_list[room_position].position_x + room_list[room_position].width == room_list[current_position].position_x) {
-                        //Right
-                        if ((room_list[current_position].position_y < room_list[room_position].position_y + room_list[room_position].height) &&
-                            (room_list[current_position].position_y + room_list[current_position].height > room_list[room_position].position_y)) {
-                            linkRooms(room_list[room_position], room_list[current_position], 1, pseudoRandom);
-                        }
-                    }
+                    }                    
                 }
-                room_position++;
             }
-            
         }
+
         static public void setDoorInRoom(Room room, int direction, int son_x_position, int son_y_position) {
             int tile_with_door;
             tile_with_door = Math.Abs(room.position_x - son_x_position) + (Math.Abs(room.position_y - son_y_position) * room.width);
@@ -234,24 +240,32 @@ namespace DungeonGenerator {
             
             switch (direction) {
                 case 0:
-                    tile_x_position = pseudoRandom.Next(max_x_position + 1, min_x_position - 1);
-                    setDoorInRoom(room_A, 0, tile_x_position, room_A.position_y);
-                    setDoorInRoom(room_B, 2, tile_x_position, room_A.position_y - 1);
+                    if (max_x_position + 1 < min_x_position - 1) { //There must be more than 2 tiles in common
+                        tile_x_position = pseudoRandom.Next(max_x_position + 1, min_x_position - 1);
+                        setDoorInRoom(room_A, 0, tile_x_position, room_A.position_y);
+                        setDoorInRoom(room_B, 2, tile_x_position, room_A.position_y - 1);
+                    }                    
                     break;
                 case 1:
-                    tile_y_position = pseudoRandom.Next(max_y_position + 1, min_y_position - 1);
-                    setDoorInRoom(room_A, 1, room_B.position_x - 1, tile_y_position);
-                    setDoorInRoom(room_B, 3, room_B.position_x, tile_y_position);
+                    if (max_y_position + 1 < min_y_position - 1) { //There must be more than 2 tiles in common
+                        tile_y_position = pseudoRandom.Next(max_y_position + 1, min_y_position - 1);
+                        setDoorInRoom(room_A, 1, room_B.position_x - 1, tile_y_position);
+                        setDoorInRoom(room_B, 3, room_B.position_x, tile_y_position);
+                    }                    
                     break;
                 case 2:
-                    tile_x_position = pseudoRandom.Next(max_x_position + 1, min_x_position - 1);
-                    setDoorInRoom(room_A, 2, tile_x_position, room_B.position_y - 1);
-                    setDoorInRoom(room_B, 0, tile_x_position, room_B.position_y);
+                    if (max_x_position + 1 < min_x_position - 1) { //There must be more than 2 tiles in common
+                        tile_x_position = pseudoRandom.Next(max_x_position + 1, min_x_position - 1);
+                        setDoorInRoom(room_A, 2, tile_x_position, room_B.position_y - 1);
+                        setDoorInRoom(room_B, 0, tile_x_position, room_B.position_y);
+                    }
                     break;
                 case 3:
-                    tile_y_position = pseudoRandom.Next(max_y_position + 1, min_y_position - 1);
-                    setDoorInRoom(room_A, 3, room_A.position_x, tile_y_position);
-                    setDoorInRoom(room_B, 1, room_A.position_x - 1, tile_y_position);
+                    if (max_y_position + 1 < min_y_position - 1) { //There must be more than 2 tiles in common
+                        tile_y_position = pseudoRandom.Next(max_y_position + 1, min_y_position - 1);
+                        setDoorInRoom(room_A, 3, room_A.position_x, tile_y_position);
+                        setDoorInRoom(room_B, 1, room_A.position_x - 1, tile_y_position);
+                    }
                     break;
             }
         }
