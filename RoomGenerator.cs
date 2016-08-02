@@ -40,9 +40,10 @@ namespace DungeonGenerator {
         }
 
         public void reproduct() {
-            if (this.depth != 0 && this.depth < 4) {
+            if (this.depth != 0 && this.depth < 5) {
                 create_child_room();
-            } else { /*Two paths in the starting room */
+            } else { /*Three paths in the starting room */
+                create_child_room();
                 create_child_room();
                 create_child_room();
             }
@@ -181,8 +182,8 @@ namespace DungeonGenerator {
         static public void connectAdjacentRooms(List<Room> room_list, System.Random pseudoRandom) {
             int room_position = 0;
             //Finish this mess
-            for (int x = 0; x < room_list.Count; x++) {
-                for (int current_position = room_position + 1; x < room_list.Count; x++) {
+            for (int x = 0; x < room_list.Count - 1; x++) {
+                for (int current_position = room_position + 1; current_position < room_list.Count; current_position++) {
                     if (room_list[room_position].position_y + room_list[room_position].height == room_list[current_position].position_y) {
                         //Down
                         if ((room_list[current_position].position_x < room_list[room_position].position_x + room_list[room_position].width) &&
@@ -223,31 +224,32 @@ namespace DungeonGenerator {
         static public void linkRooms(Room room_A, Room room_B, int direction, System.Random pseudoRandom) {
             /* room_A -> direction -> room_B */
 
-            int tile_x_position = 0;
-            int min_x_position = Math.Min(room_A.position_x, room_B.position_x);
-            int max_x_position = Math.Max(room_A.position_x + room_A.width, room_B.position_x + room_B.width);
+            int tile_x_position;
+            int min_x_position = Math.Min(room_A.position_x + room_A.width, room_B.position_x + room_B.width);
+            int max_x_position = Math.Max(room_A.position_x, room_B.position_x);
 
-            int tile_y_position = 0;
-            int min_y_position = Math.Min(room_A.position_y, room_B.position_y);
-            int max_y_position = Math.Max(room_A.position_y + room_A.height, room_B.position_y + room_B.height);
-                     
-            tile_x_position = pseudoRandom.Next(min_x_position + 1, max_x_position - 1);
-            tile_y_position = pseudoRandom.Next(min_y_position + 1, max_y_position - 1);
-                        
+            int tile_y_position;
+            int min_y_position = Math.Min(room_A.position_y + room_A.height, room_B.position_y + room_B.height);
+            int max_y_position = Math.Max(room_A.position_y, room_B.position_y);
+            
             switch (direction) {
                 case 0:
+                    tile_x_position = pseudoRandom.Next(max_x_position + 1, min_x_position - 1);
                     setDoorInRoom(room_A, 0, tile_x_position, room_A.position_y);
                     setDoorInRoom(room_B, 2, tile_x_position, room_A.position_y - 1);
                     break;
                 case 1:
+                    tile_y_position = pseudoRandom.Next(max_y_position + 1, min_y_position - 1);
                     setDoorInRoom(room_A, 1, room_B.position_x - 1, tile_y_position);
                     setDoorInRoom(room_B, 3, room_B.position_x, tile_y_position);
                     break;
                 case 2:
+                    tile_x_position = pseudoRandom.Next(max_x_position + 1, min_x_position - 1);
                     setDoorInRoom(room_A, 2, tile_x_position, room_B.position_y - 1);
                     setDoorInRoom(room_B, 0, tile_x_position, room_B.position_y);
                     break;
                 case 3:
+                    tile_y_position = pseudoRandom.Next(max_y_position + 1, min_y_position - 1);
                     setDoorInRoom(room_A, 3, room_A.position_x, tile_y_position);
                     setDoorInRoom(room_B, 1, room_A.position_x - 1, tile_y_position);
                     break;
@@ -270,11 +272,11 @@ namespace DungeonGenerator {
             Navigation.pseudoRandom = new System.Random(seed.GetHashCode());
             dungeon.initializeDungeon();
 
-            while (position < Dungeon.rooms_in_dungeon.Count && Dungeon.rooms_in_dungeon[position].depth < 5) {
+            while (position < Dungeon.rooms_in_dungeon.Count && Dungeon.rooms_in_dungeon[position].depth < 6) {
                 Dungeon.rooms_in_dungeon[position].reproduct();
                 position++;
             }
-            //CollisionDetection.connectAdjacentRooms(Dungeon.rooms_in_dungeon, Navigation.pseudoRandom);
+            CollisionDetection.connectAdjacentRooms(Dungeon.rooms_in_dungeon, Navigation.pseudoRandom);
         }
 
         void OnDrawGizmos() {
