@@ -40,7 +40,7 @@ namespace DungeonGenerator {
         }
 
         public void reproduct() {
-            if (this.depth != 0 && this.depth < 2) {
+            if (this.depth != 0 && this.depth < 3) {
                 create_child_room();
             } else { /*Three paths in the starting room */
                 create_child_room();
@@ -141,9 +141,9 @@ namespace DungeonGenerator {
         }
     }
 
-    public class Dungeon {
+    public static class Dungeon {
         public static List<Room> rooms_in_dungeon = new List<Room>();
-        public void initializeDungeon() {
+        public static void initializeDungeon() {
             Room first_room = new Room(0, 0, 5, 10);
             first_room.id = 0;
             first_room.depth = 0;
@@ -154,6 +154,20 @@ namespace DungeonGenerator {
 
     public class Navigation {
         static public System.Random pseudoRandom;
+        static public int getRandomNormalNumber() {
+        /* Used for room sizes*/
+            /*Special thanks to Superbest random:
+             * https://bitbucket.org/Superbest/superbest-random/src
+             *  */
+            int u1 = pseudoRandom.Next();
+            int u2 = pseudoRandom.Next();
+            int mu = 0;
+            int sigma = 1;
+            double rand_std_normal = Math.Sqrt(-2 * Math.Log(u1)) *
+                                Math.Sin(2 * Math.PI * u2);
+            int rand_normal = mu + sigma * (int)rand_std_normal;
+            return rand_normal;
+        }
         static public int getDirection() {
             /* 0: UP  1: RIGHT 2: DOWN 3: LEFT */
             return pseudoRandom.Next(0, 4);
@@ -180,7 +194,6 @@ namespace DungeonGenerator {
         }
 
         static public void connectAdjacentRooms(List<Room> room_list, System.Random pseudoRandom) {
-            //Finish this mess
             for (int pivot_room = 0; pivot_room < room_list.Count - 1; pivot_room++) {
                 for (int current_position = 0; current_position < room_list.Count; current_position++) {
                     if (current_position != pivot_room) {
@@ -190,7 +203,7 @@ namespace DungeonGenerator {
                                 (room_list[current_position].position_x + room_list[current_position].width > room_list[pivot_room].position_x)) {
                                 //Don't connect father-child rooms
                                 if ((!room_list[pivot_room].child_rooms.Contains(room_list[current_position].id)) && (!room_list[current_position].child_rooms.Contains(room_list[pivot_room].id))) {
-                                    linkRooms(room_list[pivot_room], room_list[current_position], 2, pseudoRandom);
+                                    link2Rooms(room_list[pivot_room], room_list[current_position], 2, pseudoRandom);
                                 }
                             }
                         } else if (room_list[pivot_room].position_x + room_list[pivot_room].width == room_list[current_position].position_x) {
@@ -199,7 +212,7 @@ namespace DungeonGenerator {
                                 (room_list[current_position].position_y + room_list[current_position].height > room_list[pivot_room].position_y)) {
                                 //Don't connect father-child rooms
                                 if ((!room_list[pivot_room].child_rooms.Contains(room_list[current_position].id)) && (!room_list[current_position].child_rooms.Contains(room_list[pivot_room].id))) {
-                                    linkRooms(room_list[pivot_room], room_list[current_position], 1, pseudoRandom);
+                                    link2Rooms(room_list[pivot_room], room_list[current_position], 1, pseudoRandom);
                                 }
                             }
                         }
@@ -227,7 +240,7 @@ namespace DungeonGenerator {
             }
         }
 
-        static public void linkRooms(Room room_A, Room room_B, int direction, System.Random pseudoRandom) {
+        static public void link2Rooms(Room room_A, Room room_B, int direction, System.Random pseudoRandom) {
             /* room_A -> direction -> room_B */
 
             int tile_x_position;
@@ -240,28 +253,28 @@ namespace DungeonGenerator {
             
             switch (direction) {
                 case 0:
-                    if (max_x_position + 1 < min_x_position - 1) { //There must be more than 2 tiles in common
+                    if (max_x_position + 2 < min_x_position) { //There must be more than 2 tiles in common
                         tile_x_position = pseudoRandom.Next(max_x_position + 1, min_x_position - 1);
                         setDoorInRoom(room_A, 0, tile_x_position, room_A.position_y);
                         setDoorInRoom(room_B, 2, tile_x_position, room_A.position_y - 1);
                     }                    
                     break;
                 case 1:
-                    if (max_y_position + 1 < min_y_position - 1) { //There must be more than 2 tiles in common
+                    if (max_y_position + 2 < min_y_position) { //There must be more than 2 tiles in common
                         tile_y_position = pseudoRandom.Next(max_y_position + 1, min_y_position - 1);
                         setDoorInRoom(room_A, 1, room_B.position_x - 1, tile_y_position);
                         setDoorInRoom(room_B, 3, room_B.position_x, tile_y_position);
                     }                    
                     break;
                 case 2:
-                    if (max_x_position + 1 < min_x_position - 1) { //There must be more than 2 tiles in common
+                    if (max_x_position + 2 < min_x_position) { //There must be more than 2 tiles in common
                         tile_x_position = pseudoRandom.Next(max_x_position + 1, min_x_position - 1);
                         setDoorInRoom(room_A, 2, tile_x_position, room_B.position_y - 1);
                         setDoorInRoom(room_B, 0, tile_x_position, room_B.position_y);
                     }
                     break;
                 case 3:
-                    if (max_y_position + 1 < min_y_position - 1) { //There must be more than 2 tiles in common
+                    if (max_y_position + 2 < min_y_position) { //There must be more than 2 tiles in common
                         tile_y_position = pseudoRandom.Next(max_y_position + 1, min_y_position - 1);
                         setDoorInRoom(room_A, 3, room_A.position_x, tile_y_position);
                         setDoorInRoom(room_B, 1, room_A.position_x - 1, tile_y_position);
@@ -273,8 +286,7 @@ namespace DungeonGenerator {
 
     public class RoomGenerator : MonoBehaviour {
 
-        public string seed;                        
-        public Dungeon dungeon = new Dungeon();
+        public string seed;                       
         
         // Use this for initialization
         void Start() {
@@ -284,7 +296,7 @@ namespace DungeonGenerator {
         public void buildRoom() {
             int position = 0;
             Navigation.pseudoRandom = new System.Random(seed.GetHashCode());
-            dungeon.initializeDungeon();
+            Dungeon.initializeDungeon();
 
             while (position < Dungeon.rooms_in_dungeon.Count && Dungeon.rooms_in_dungeon[position].depth < 6) {
                 Dungeon.rooms_in_dungeon[position].reproduct();
