@@ -69,8 +69,8 @@ namespace DungeonGenerator {
 
             do {
                 direction = Navigation.getDirection();
-                child_width = Navigation.pseudoRandom.Next(5, 20);
-                child_height = Navigation.pseudoRandom.Next(5, 20);
+                child_width = Navigation.getRoomSize();
+                child_height = Navigation.getRoomSize();
                 switch (direction) {
                     case 0:
                         tile_with_door = Navigation.pseudoRandom.Next(1, this.width - 2);
@@ -158,19 +158,26 @@ namespace DungeonGenerator {
 
     public class Navigation {
         static public System.Random pseudoRandom;
+        static public int getRoomSize() {
+            /* From 5 to 20 */
+            int number = getRandomNormalNumber();
+            if (number > 20) number = 20;
+            if (number < 5) number = 5;
+            return number;
+        }
         static public int getRandomNormalNumber() {
-        /* Used for room sizes*/
+            /* Used for room sizes*/
             /*Special thanks to Superbest random:
              * https://bitbucket.org/Superbest/superbest-random/src
              *  */
-            int u1 = pseudoRandom.Next();
-            int u2 = pseudoRandom.Next();
-            int mu = 0;
-            int sigma = 1;
+            double u1 = pseudoRandom.NextDouble();
+            double u2 = pseudoRandom.NextDouble();
+            double mu = 12;
+            double sigma = 8;
             double rand_std_normal = Math.Sqrt(-2 * Math.Log(u1)) *
                                 Math.Sin(2 * Math.PI * u2);
-            int rand_normal = mu + sigma * (int)rand_std_normal;
-            return rand_normal;
+            double rand_normal = mu + sigma * rand_std_normal;
+            return (int)rand_normal;
         }
         static public int getDirection() {
             /* 0: UP  1: RIGHT 2: DOWN 3: LEFT */
@@ -393,8 +400,8 @@ namespace DungeonGenerator {
         static public void insertRoomInsideRoom(Room room) {
             int innerRoom_X_Position;
             int innerRoom_Y_Position;
-            int innerRoomWidth = Navigation.pseudoRandom.Next(5, 20); ;
-            int innerRoomHeight = Navigation.pseudoRandom.Next(5, 20); ;
+            int innerRoomWidth = Navigation.getRoomSize();
+            int innerRoomHeight = Navigation.getRoomSize();
             int tries = 0;
             bool collision = true; // innerRoom must be fully inside room
             if (room.width > 7 && room.height > 7) {
