@@ -20,7 +20,7 @@ namespace DungeonGenerator {
 
     public class Room {
         public int id;
-
+        
         public int position_x;
         public int position_y;
 
@@ -28,6 +28,8 @@ namespace DungeonGenerator {
         public int width;
 
         public int depth;
+
+        public bool isInnerRoom = false;
 
         public List<int> child_rooms = new List<int>();
         public List<Tile> floor = new List<Tile>();
@@ -198,7 +200,7 @@ namespace DungeonGenerator {
         static public void connectAdjacentRooms(List<Room> room_list, System.Random pseudoRandom) {
             for (int pivot_room = 0; pivot_room < room_list.Count - 1; pivot_room++) {
                 for (int current_position = 0; current_position < room_list.Count; current_position++) {
-                    if (current_position != pivot_room) {
+                    if ((current_position != pivot_room) && (!room_list[pivot_room].isInnerRoom) && (!room_list[current_position].isInnerRoom)){
                         if (room_list[pivot_room].position_y + room_list[pivot_room].height == room_list[current_position].position_y) {
                             //Down
                             if ((room_list[current_position].position_x < room_list[pivot_room].position_x + room_list[pivot_room].width) &&
@@ -244,6 +246,8 @@ namespace DungeonGenerator {
 
         static public void setPillarInRoom(Room room, int room_x_position, int room_y_position) {
             int pillarTile = room_x_position + (room.width * room_y_position);
+
+            //TODO: Needs adjacent tiles with wall too!
             room.floor[pillarTile].up = 1;
             room.floor[pillarTile].left = 1;
 
@@ -385,6 +389,33 @@ namespace DungeonGenerator {
                     break;
             }
         }
+
+        static public void insertRoomInsideRoom(Room room) {
+            int innerRoom_X_Position;
+            int innerRoom_Y_Position;
+            int innerRoomWidth = Navigation.pseudoRandom.Next(5, 20); ;
+            int innerRoomHeight = Navigation.pseudoRandom.Next(5, 20); ;
+            int tries = 0;
+            bool collision = true; // innerRoom must be fully inside room
+            if (room.width > 7 && room.height > 7) {
+                do {
+                    innerRoom_X_Position = Navigation.pseudoRandom.Next(1, room.width - 6);
+                    innerRoom_Y_Position = Navigation.pseudoRandom.Next(1, room.height - 6);
+                    if (innerRoom_X_Position + innerRoomWidth < room.width &&
+                        innerRoom_Y_Position + innerRoomHeight < room.height) {
+                        collision = false;
+                    }
+                    tries++;
+                } while (tries < 5 && collision);
+                if (!collision) {
+                    //TODO: Needs adjacent tiles with wall too!
+                    Room innerRoom = new Room(innerRoom_X_Position + room.position_x, innerRoom_Y_Position + room.position_y, innerRoomHeight, innerRoomWidth);
+                    innerRoom.isInnerRoom = true;
+                    innerRoom.fillRoom();
+                    Dungeon.rooms_in_dungeon.Add(innerRoom);
+                }
+            }
+        }
     }
 
     public class RoomGenerator : MonoBehaviour {
@@ -405,7 +436,10 @@ namespace DungeonGenerator {
                 Dungeon.rooms_in_dungeon[position].reproduct();
                 position++;
             }
-            for(int x = 0; x < Dungeon.rooms_in_dungeon.Count; x++) DungeonTools.addPillarsToRoom(Dungeon.rooms_in_dungeon[x]);
+            for (int x = 0; x < Dungeon.rooms_in_dungeon.Count; x++) {
+                if (!Dungeon.rooms_in_dungeon[x].isInnerRoom) DungeonTools.addPillarsToRoom(Dungeon.rooms_in_dungeon[x]);
+                DungeonTools.insertRoomInsideRoom(Dungeon.rooms_in_dungeon[x]);                
+            }
             DungeonTools.connectAdjacentRooms(Dungeon.rooms_in_dungeon, Navigation.pseudoRandom);
         }
 
