@@ -97,27 +97,27 @@ namespace DungeonGenerator {
 
                 number_of_tries++;
                 //Ensure there's no collision before adding the room to the dungeon!
-                collision = CollisionDetection.detectDungeonCollision(child_room, Dungeon.rooms_in_dungeon);
+                collision = DungeonTools.detectDungeonCollision(child_room, Dungeon.rooms_in_dungeon);
             } while ((number_of_tries < max_number_of_tries) && collision);
 
             if (!collision){
                 child_room.fillRoom();
                 switch (direction) {
                     case 0:
-                        CollisionDetection.setDoorInRoom(this, direction, position_x + tile_with_door, position_y);
-                        CollisionDetection.setDoorInRoom(child_room, (direction + 2) % 4, position_x + tile_with_door, position_y - 1);
+                        DungeonTools.setDoorInRoom(this, direction, position_x + tile_with_door, position_y);
+                        DungeonTools.setDoorInRoom(child_room, (direction + 2) % 4, position_x + tile_with_door, position_y - 1);
                         break;
                     case 1:
-                        CollisionDetection.setDoorInRoom(this, direction, position_x + width - 1, position_y + tile_with_door);
-                        CollisionDetection.setDoorInRoom(child_room, (direction + 2) % 4, position_x + width, position_y + tile_with_door);
+                        DungeonTools.setDoorInRoom(this, direction, position_x + width - 1, position_y + tile_with_door);
+                        DungeonTools.setDoorInRoom(child_room, (direction + 2) % 4, position_x + width, position_y + tile_with_door);
                         break;
                     case 2:
-                        CollisionDetection.setDoorInRoom(this, direction, position_x + tile_with_door, position_y + height - 1);
-                        CollisionDetection.setDoorInRoom(child_room, (direction + 2) % 4, position_x + tile_with_door, position_y + this.height);
+                        DungeonTools.setDoorInRoom(this, direction, position_x + tile_with_door, position_y + height - 1);
+                        DungeonTools.setDoorInRoom(child_room, (direction + 2) % 4, position_x + tile_with_door, position_y + this.height);
                         break;
                     case 3:
-                        CollisionDetection.setDoorInRoom(this, direction, position_x, position_y + tile_with_door);
-                        CollisionDetection.setDoorInRoom(child_room, (direction + 2) % 4, position_x - 1, position_y + tile_with_door);
+                        DungeonTools.setDoorInRoom(this, direction, position_x, position_y + tile_with_door);
+                        DungeonTools.setDoorInRoom(child_room, (direction + 2) % 4, position_x - 1, position_y + tile_with_door);
                         break;
                 }                
                 Dungeon.rooms_in_dungeon.Add(child_room);
@@ -142,8 +142,10 @@ namespace DungeonGenerator {
     }
 
     public static class Dungeon {
-        public static List<Room> rooms_in_dungeon = new List<Room>();
+        public static List<Room> rooms_in_dungeon;
         public static void initializeDungeon() {
+            rooms_in_dungeon = new List<Room>();
+
             Room first_room = new Room(0, 0, 5, 10);
             first_room.id = 0;
             first_room.depth = 0;
@@ -174,7 +176,7 @@ namespace DungeonGenerator {
         }
     }
 
-    public class CollisionDetection {
+    public class DungeonTools {
         static public bool detectDungeonCollision(Room room, List<Room> room_list) {
             bool exit_value = false;
             int room_count = 0;
@@ -240,7 +242,108 @@ namespace DungeonGenerator {
             }
         }
 
+        static public void setPillarInRoom(Room room, int room_x_position, int room_y_position) {
+            int pillarTile = room_x_position + (room.width * room_y_position);
+            room.floor[pillarTile].up = 1;
+            room.floor[pillarTile].left = 1;
+
+            room.floor[pillarTile + 1].up = 1;
+            room.floor[pillarTile + 1].right = 1;
+
+            room.floor[pillarTile + room.width].down = 1;
+            room.floor[pillarTile + room.width].left = 1;
+
+            room.floor[pillarTile + room.width + 1].down = 1;
+            room.floor[pillarTile + room.width + 1].right = 1;
+        }
+
+        static public void addPillarsToRoom(Room room) {
+            int direction = Navigation.getDirection();
+            int starting_x_separation = Navigation.pseudoRandom.Next(1, 3);
+            int starting_y_separation = Navigation.pseudoRandom.Next(1, 3);
+
+            int starting_x_position;
+            int starting_y_position;
+            int current_x_position;
+            int current_y_position;
+
+            
+            switch (direction) {
+                case 0: //Down -> Up
+                    starting_x_position = room.width - starting_x_separation - 2;
+                    starting_y_position = room.height - starting_y_separation - 2;
+                    current_y_position = starting_y_position;
+
+                    setPillarInRoom(room, starting_x_position, starting_y_position);
+                    if (starting_x_separation < starting_x_position - 4) {
+                        setPillarInRoom(room, starting_x_separation, starting_y_position);
+                    }
+                    while (current_y_position - 4 > 0) {
+                        current_y_position -= 4;
+                        setPillarInRoom(room, starting_x_position, current_y_position);
+                        if (starting_x_separation < starting_x_position - 4) {
+                            setPillarInRoom(room, starting_x_separation, current_y_position);
+                        }
+                    }
+                    break;
+                case 1: //Left -> Right
+                    starting_x_position = starting_x_separation;
+                    starting_y_position = starting_y_separation;
+                    current_x_position = starting_x_position;
+
+                    setPillarInRoom(room, starting_x_position, starting_y_position);
+                    if (room.height > starting_y_position + 6) {
+                        setPillarInRoom(room, starting_x_position, room.height - starting_y_position - 2);
+                    }
+                    while (current_x_position + 6 < room.width) {
+                        current_x_position += 4;
+                        setPillarInRoom(room, current_x_position, starting_y_position);
+                        if (room.height > starting_y_position + 6) {
+                            setPillarInRoom(room, current_x_position, room.height - starting_y_position - 2);
+                        }
+                    }
+                    break;
+                case 2: //Up -> Down
+                    starting_x_position = starting_x_separation;
+                    starting_y_position = starting_y_separation;
+                    current_y_position = starting_y_position;
+
+                    setPillarInRoom(room, starting_x_position, starting_y_position);
+                    if (room.width > starting_x_position + 6) {
+                        setPillarInRoom(room, room.width - starting_x_position - 2, starting_y_position);
+                    }
+                    while (current_y_position + 6 < room.height) {
+                        current_y_position += 4;
+                        setPillarInRoom(room, starting_x_position, current_y_position);
+                        if (room.width > starting_x_position + 6) {
+                            setPillarInRoom(room, room.width - starting_x_position - 2, current_y_position);
+                        }
+                    }
+                    break;
+                case 3: // Right -> Left
+                    starting_x_position = room.width - starting_x_separation - 2;
+                    starting_y_position = room.height - starting_y_separation - 2;
+                    current_x_position = starting_x_position;
+
+                    setPillarInRoom(room, starting_x_position, starting_y_position);
+                    if (starting_y_separation < starting_y_position - 4) {
+                        setPillarInRoom(room, starting_x_position, starting_y_separation);
+                    }
+                    while (current_x_position - 4 > 0) {
+                        current_x_position -= 4;
+                        setPillarInRoom(room, current_x_position, starting_y_position);
+                        if (starting_y_separation < starting_y_position - 4) {
+                            setPillarInRoom(room, current_x_position, starting_y_separation);
+                        }
+                    }
+                    break;
+            }
+            
+            
+        }
+
         static public void link2Rooms(Room room_A, Room room_B, int direction, System.Random pseudoRandom) {
+            /* room_A must be adjacent to room_B */
             /* room_A -> direction -> room_B */
 
             int tile_x_position;
@@ -298,11 +401,12 @@ namespace DungeonGenerator {
             Navigation.pseudoRandom = new System.Random(seed.GetHashCode());
             Dungeon.initializeDungeon();
 
-            while (position < Dungeon.rooms_in_dungeon.Count && Dungeon.rooms_in_dungeon[position].depth < 6) {
+            while (position < Dungeon.rooms_in_dungeon.Count && Dungeon.rooms_in_dungeon[position].depth < 10) {
                 Dungeon.rooms_in_dungeon[position].reproduct();
                 position++;
             }
-            CollisionDetection.connectAdjacentRooms(Dungeon.rooms_in_dungeon, Navigation.pseudoRandom);
+            for(int x = 0; x < Dungeon.rooms_in_dungeon.Count; x++) DungeonTools.addPillarsToRoom(Dungeon.rooms_in_dungeon[x]);
+            DungeonTools.connectAdjacentRooms(Dungeon.rooms_in_dungeon, Navigation.pseudoRandom);
         }
 
         void OnDrawGizmos() {
