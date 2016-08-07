@@ -28,11 +28,12 @@ namespace DungeonGenerator {
         public int width;
 
         public int depth;
-
-        public bool isInnerRoom = false;
-
+        
         public List<int> child_rooms = new List<int>();
         public List<Tile> floor = new List<Tile>();
+
+        public bool isInnerRoom = false;
+        public List<int> inner_rooms = new List<int>();
 
         public Room(int x, int y, int height, int width) {
             position_x = x;
@@ -232,9 +233,53 @@ namespace DungeonGenerator {
             }
         }
 
-        static public void setDoorInRoom(Room room, int direction, int son_x_position, int son_y_position) {
+        static public void link2Rooms(Room room_A, Room room_B, int direction, System.Random pseudoRandom) {
+            /* room_A must be adjacent to room_B */
+            /* room_A -> direction -> room_B */
+
+            int tile_x_position;
+            int min_x_position = Math.Min(room_A.position_x + room_A.width, room_B.position_x + room_B.width);
+            int max_x_position = Math.Max(room_A.position_x, room_B.position_x);
+
+            int tile_y_position;
+            int min_y_position = Math.Min(room_A.position_y + room_A.height, room_B.position_y + room_B.height);
+            int max_y_position = Math.Max(room_A.position_y, room_B.position_y);
+
+            switch (direction) {
+                case 0:
+                    if (max_x_position + 2 < min_x_position) { //There must be more than 2 tiles in common
+                        tile_x_position = pseudoRandom.Next(max_x_position + 1, min_x_position - 1);
+                        setDoorInRoom(room_A, 0, tile_x_position, room_A.position_y);
+                        setDoorInRoom(room_B, 2, tile_x_position, room_A.position_y - 1);
+                    }
+                    break;
+                case 1:
+                    if (max_y_position + 2 < min_y_position) { //There must be more than 2 tiles in common
+                        tile_y_position = pseudoRandom.Next(max_y_position + 1, min_y_position - 1);
+                        setDoorInRoom(room_A, 1, room_B.position_x - 1, tile_y_position);
+                        setDoorInRoom(room_B, 3, room_B.position_x, tile_y_position);
+                    }
+                    break;
+                case 2:
+                    if (max_x_position + 2 < min_x_position) { //There must be more than 2 tiles in common
+                        tile_x_position = pseudoRandom.Next(max_x_position + 1, min_x_position - 1);
+                        setDoorInRoom(room_A, 2, tile_x_position, room_B.position_y - 1);
+                        setDoorInRoom(room_B, 0, tile_x_position, room_B.position_y);
+                    }
+                    break;
+                case 3:
+                    if (max_y_position + 2 < min_y_position) { //There must be more than 2 tiles in common
+                        tile_y_position = pseudoRandom.Next(max_y_position + 1, min_y_position - 1);
+                        setDoorInRoom(room_A, 3, room_A.position_x, tile_y_position);
+                        setDoorInRoom(room_B, 1, room_A.position_x - 1, tile_y_position);
+                    }
+                    break;
+            }
+        }
+
+        static public void setDoorInRoom(Room room, int direction, int door_x_position, int door_y_position) {
             int tile_with_door;
-            tile_with_door = Math.Abs(room.position_x - son_x_position) + (Math.Abs(room.position_y - son_y_position) * room.width);
+            tile_with_door = Math.Abs(room.position_x - door_x_position) + (Math.Abs(room.position_y - door_y_position) * room.width);
             switch (direction) {
                 case 0:
                     room.floor[tile_with_door].up = 2;
@@ -353,50 +398,6 @@ namespace DungeonGenerator {
             
         }
 
-        static public void link2Rooms(Room room_A, Room room_B, int direction, System.Random pseudoRandom) {
-            /* room_A must be adjacent to room_B */
-            /* room_A -> direction -> room_B */
-
-            int tile_x_position;
-            int min_x_position = Math.Min(room_A.position_x + room_A.width, room_B.position_x + room_B.width);
-            int max_x_position = Math.Max(room_A.position_x, room_B.position_x);
-
-            int tile_y_position;
-            int min_y_position = Math.Min(room_A.position_y + room_A.height, room_B.position_y + room_B.height);
-            int max_y_position = Math.Max(room_A.position_y, room_B.position_y);
-            
-            switch (direction) {
-                case 0:
-                    if (max_x_position + 2 < min_x_position) { //There must be more than 2 tiles in common
-                        tile_x_position = pseudoRandom.Next(max_x_position + 1, min_x_position - 1);
-                        setDoorInRoom(room_A, 0, tile_x_position, room_A.position_y);
-                        setDoorInRoom(room_B, 2, tile_x_position, room_A.position_y - 1);
-                    }                    
-                    break;
-                case 1:
-                    if (max_y_position + 2 < min_y_position) { //There must be more than 2 tiles in common
-                        tile_y_position = pseudoRandom.Next(max_y_position + 1, min_y_position - 1);
-                        setDoorInRoom(room_A, 1, room_B.position_x - 1, tile_y_position);
-                        setDoorInRoom(room_B, 3, room_B.position_x, tile_y_position);
-                    }                    
-                    break;
-                case 2:
-                    if (max_x_position + 2 < min_x_position) { //There must be more than 2 tiles in common
-                        tile_x_position = pseudoRandom.Next(max_x_position + 1, min_x_position - 1);
-                        setDoorInRoom(room_A, 2, tile_x_position, room_B.position_y - 1);
-                        setDoorInRoom(room_B, 0, tile_x_position, room_B.position_y);
-                    }
-                    break;
-                case 3:
-                    if (max_y_position + 2 < min_y_position) { //There must be more than 2 tiles in common
-                        tile_y_position = pseudoRandom.Next(max_y_position + 1, min_y_position - 1);
-                        setDoorInRoom(room_A, 3, room_A.position_x, tile_y_position);
-                        setDoorInRoom(room_B, 1, room_A.position_x - 1, tile_y_position);
-                    }
-                    break;
-            }
-        }
-
         static public void insertRoomInsideRoom(Room room) {
             int innerRoom_X_Position;
             int innerRoom_Y_Position;
@@ -417,11 +418,47 @@ namespace DungeonGenerator {
                 if (!collision) {
                     //TODO: Needs adjacent tiles with wall too!
                     Room innerRoom = new Room(innerRoom_X_Position + room.position_x, innerRoom_Y_Position + room.position_y, innerRoomHeight, innerRoomWidth);
+                    room.inner_rooms.Add(Dungeon.rooms_in_dungeon.Count);
+                    innerRoom.id = Dungeon.rooms_in_dungeon.Count;
                     innerRoom.isInnerRoom = true;
                     innerRoom.fillRoom();
+                    setDoorInInnerRoom(room, innerRoom, Navigation.pseudoRandom);
                     Dungeon.rooms_in_dungeon.Add(innerRoom);
                 }
             }
+        }
+
+        static public int setDoorInInnerRoom(Room room, Room innerRoom, System.Random pseudoRandom) {
+            /* Returns room's tile with door position
+             * Also adds a door to said tile */
+
+            int depth;
+            int direction = Navigation.getDirection();
+            int selected_tile_with_door = -1;
+
+            switch (direction) {
+                case 0: //UP
+                    depth = pseudoRandom.Next(1, innerRoom.width - 1);
+                    setDoorInRoom(innerRoom, 0, innerRoom.position_x + depth, innerRoom.position_y);
+                    setDoorInRoom(room, 2, innerRoom.position_x + depth, innerRoom.position_y - 1);
+                    break;
+                case 1: //RIGHT
+                    depth = pseudoRandom.Next(1, innerRoom.height - 1);
+                    setDoorInRoom(innerRoom, 1, innerRoom.position_x + innerRoom.width - 1, innerRoom.position_y + depth);
+                    setDoorInRoom(room, 3, innerRoom.position_x + innerRoom.width, innerRoom.position_y + depth);
+                    break;
+                case 2: //DOWN
+                    depth = pseudoRandom.Next(1, innerRoom.width - 1);
+                    setDoorInRoom(innerRoom, 2, innerRoom.position_x + depth, innerRoom.position_y + innerRoom.height - 1);
+                    setDoorInRoom(room, 0, innerRoom.position_x + depth, innerRoom.position_y + innerRoom.height);
+                    break;
+                case 3: //LEFT
+                    depth = pseudoRandom.Next(1, innerRoom.height - 1);
+                    setDoorInRoom(innerRoom, 3, innerRoom.position_x, innerRoom.position_y + depth);
+                    setDoorInRoom(room, 1, innerRoom.position_x - 1, innerRoom.position_y + depth);
+                    break;
+            }
+            return selected_tile_with_door;
         }
     }
 
