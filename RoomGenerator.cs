@@ -302,15 +302,23 @@ namespace DungeonGenerator {
             //TODO: Needs adjacent tiles with wall too!
             room.floor[pillarTile].up = 1;
             room.floor[pillarTile].left = 1;
+            room.floor[pillarTile].down = 1;
+            room.floor[pillarTile].right = 1;
 
             room.floor[pillarTile + 1].up = 1;
             room.floor[pillarTile + 1].right = 1;
+            room.floor[pillarTile + 1].down = 1;
+            room.floor[pillarTile + 1].left = 1;
 
             room.floor[pillarTile + room.width].down = 1;
             room.floor[pillarTile + room.width].left = 1;
+            room.floor[pillarTile + room.width].up = 1;
+            room.floor[pillarTile + room.width].right = 1;
 
             room.floor[pillarTile + room.width + 1].down = 1;
             room.floor[pillarTile + room.width + 1].right = 1;
+            room.floor[pillarTile + room.width + 1].up = 1;
+            room.floor[pillarTile + room.width + 1].left = 1;
         }
 
         static public void addPillarsToRoom(Room room) {
@@ -405,6 +413,7 @@ namespace DungeonGenerator {
             int innerRoomHeight = Navigation.getRoomSize();
             int tries = 0;
             bool collision = true; // innerRoom must be fully inside room
+            bool door_set = false; // it could occur there is no space left for a door
             if (room.width > 7 && room.height > 7) {
                 do {
                     innerRoom_X_Position = Navigation.pseudoRandom.Next(1, room.width - 6);
@@ -422,43 +431,62 @@ namespace DungeonGenerator {
                     innerRoom.id = Dungeon.rooms_in_dungeon.Count;
                     innerRoom.isInnerRoom = true;
                     innerRoom.fillRoom();
-                    setDoorInInnerRoom(room, innerRoom, Navigation.pseudoRandom);
-                    Dungeon.rooms_in_dungeon.Add(innerRoom);
+
+                    door_set = setDoorInInnerRoom(room, innerRoom, Navigation.pseudoRandom);
+                    if (door_set) Dungeon.rooms_in_dungeon.Add(innerRoom);
                 }
             }
         }
 
-        static public int setDoorInInnerRoom(Room room, Room innerRoom, System.Random pseudoRandom) {
-            /* Returns room's tile with door position
-             * Also adds a door to said tile */
+        static public bool setDoorInInnerRoom(Room room, Room innerRoom, System.Random pseudoRandom) {
+            /* Returns false if there is no space for a door to join the room with its inner room */
+            /* It should hardly (if not at all) ever happen */
 
             int depth;
-            int direction = Navigation.getDirection();
-            int selected_tile_with_door = -1;
+            int direction;
+            bool door_set = false;
+            int tries = 0;
 
-            switch (direction) {
-                case 0: //UP
-                    depth = pseudoRandom.Next(1, innerRoom.width - 1);
-                    setDoorInRoom(innerRoom, 0, innerRoom.position_x + depth, innerRoom.position_y);
-                    setDoorInRoom(room, 2, innerRoom.position_x + depth, innerRoom.position_y - 1);
-                    break;
-                case 1: //RIGHT
-                    depth = pseudoRandom.Next(1, innerRoom.height - 1);
-                    setDoorInRoom(innerRoom, 1, innerRoom.position_x + innerRoom.width - 1, innerRoom.position_y + depth);
-                    setDoorInRoom(room, 3, innerRoom.position_x + innerRoom.width, innerRoom.position_y + depth);
-                    break;
-                case 2: //DOWN
-                    depth = pseudoRandom.Next(1, innerRoom.width - 1);
-                    setDoorInRoom(innerRoom, 2, innerRoom.position_x + depth, innerRoom.position_y + innerRoom.height - 1);
-                    setDoorInRoom(room, 0, innerRoom.position_x + depth, innerRoom.position_y + innerRoom.height);
-                    break;
-                case 3: //LEFT
-                    depth = pseudoRandom.Next(1, innerRoom.height - 1);
-                    setDoorInRoom(innerRoom, 3, innerRoom.position_x, innerRoom.position_y + depth);
-                    setDoorInRoom(room, 1, innerRoom.position_x - 1, innerRoom.position_y + depth);
-                    break;
-            }
-            return selected_tile_with_door;
+            do {
+                direction = Navigation.getDirection();
+                switch (direction) {
+                    case 0: //UP
+                        depth = pseudoRandom.Next(1, innerRoom.width - 1);
+                        if (room.floor[(innerRoom.position_x - room.position_x + depth) + ((innerRoom.position_y - room.position_y - 1) * room.width)].down != 1) {
+                            setDoorInRoom(innerRoom, 0, innerRoom.position_x + depth, innerRoom.position_y);
+                            setDoorInRoom(room, 2, innerRoom.position_x + depth, innerRoom.position_y - 1);
+                            door_set = true;
+                        }
+                        break;
+                    case 1: //RIGHT
+                        depth = pseudoRandom.Next(1, innerRoom.height - 1);
+                        if (room.floor[(innerRoom.position_x + innerRoom.width - room.position_x) + ((innerRoom.position_y - room.position_y + depth) * room.width)].down != 1) {
+                            setDoorInRoom(innerRoom, 1, innerRoom.position_x + innerRoom.width - 1, innerRoom.position_y + depth);
+                            setDoorInRoom(room, 3, innerRoom.position_x + innerRoom.width, innerRoom.position_y + depth);
+                            door_set = true;
+                        }
+                        break;
+                    case 2: //DOWN
+                        depth = pseudoRandom.Next(1, innerRoom.width - 1);
+                        if (room.floor[(innerRoom.position_x - room.position_x + depth) + ((innerRoom.position_y + innerRoom.height - room.position_y) * room.width)].down != 1) {
+                            setDoorInRoom(innerRoom, 2, innerRoom.position_x + depth, innerRoom.position_y + innerRoom.height - 1);
+                            setDoorInRoom(room, 0, innerRoom.position_x + depth, innerRoom.position_y + innerRoom.height);
+                            door_set = true;
+                        }
+                        break;
+                    case 3: //LEFT
+                        depth = pseudoRandom.Next(1, innerRoom.height - 1);
+                        if (room.floor[(innerRoom.position_x - room.position_x - 1) + ((innerRoom.position_y - room.position_y + depth) * room.width)].down != 1) {
+                            setDoorInRoom(innerRoom, 3, innerRoom.position_x, innerRoom.position_y + depth);
+                            setDoorInRoom(room, 1, innerRoom.position_x - 1, innerRoom.position_y + depth);
+                            door_set = true;
+                        }
+                        break;
+                }
+                tries++;
+            } while (tries < 400 && !door_set);
+            
+            return door_set;
         }
     }
 
