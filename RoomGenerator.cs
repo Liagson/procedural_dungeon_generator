@@ -1,6 +1,7 @@
-﻿using UnityEngine;
+﻿using System;
 using System.Collections.Generic;
-using System;
+using System.IO;
+using UnityEngine;
 
 namespace DungeonGenerator {
 
@@ -70,8 +71,8 @@ namespace DungeonGenerator {
 
             do {
                 direction = Navigation.getDirection();
-                child_width = Navigation.getRoomSize();
-                child_height = Navigation.getRoomSize();
+                child_width = DungeonTools.getRoomSize();
+                child_height = DungeonTools.getRoomSize();
                 switch (direction) {
                     case 0:
                         tile_with_door = Navigation.pseudoRandom.Next(1, this.width - 2);
@@ -122,7 +123,11 @@ namespace DungeonGenerator {
                         DungeonTools.setDoorInRoom(this, direction, position_x, position_y + tile_with_door);
                         DungeonTools.setDoorInRoom(child_room, (direction + 2) % 4, position_x - 1, position_y + tile_with_door);
                         break;
-                }                
+                }
+                if (child_room.position_x < Dungeon.min_x_position) Dungeon.min_x_position = child_room.position_x;
+                if (child_room.position_y < Dungeon.min_y_position) Dungeon.min_y_position = child_room.position_y;
+                if (child_room.position_x + child_room.width > Dungeon.max_x_position) Dungeon.max_x_position = child_room.position_x + child_room.width;
+                if (child_room.position_y + child_room.height > Dungeon.max_y_position) Dungeon.max_y_position = child_room.position_y + child_room.height;
                 Dungeon.rooms_in_dungeon.Add(child_room);
                 this.child_rooms.Add(child_room.id);
             }
@@ -146,6 +151,12 @@ namespace DungeonGenerator {
 
     public static class Dungeon {
         public static List<Room> rooms_in_dungeon;
+        public static int min_x_position = 0;
+        public static int min_y_position = 0;
+        public static int max_x_position = 0;
+        public static int max_y_position = 0;
+        private static Tile[,] dungeon_matrix;
+
         public static void initializeDungeon() {
             rooms_in_dungeon = new List<Room>();
 
@@ -154,18 +165,64 @@ namespace DungeonGenerator {
             first_room.depth = 0;
             first_room.fillRoom();
             rooms_in_dungeon.Add(first_room);
+
+            Dungeon.max_x_position = 10;
+            Dungeon.max_y_position = 5;
+            Dungeon.min_x_position = 0;
+            Dungeon.min_y_position = 0;
+        }
+
+        public static void saveDungeonFile() {
+            string path = @"saveFile.txt";
+            int dungeon_width = max_x_position - min_x_position;
+            int dungeon_height = max_y_position - min_y_position;
+            Tile blank_tile = new Tile();
+
+            setDungeonMatrix();
+            using (BinaryWriter bw = new BinaryWriter(File.Open(path, FileMode.Create))) {
+                bw.Write(dungeon_width);
+                bw.Write(dungeon_height);
+                for (int y = 0; y < dungeon_height; y++) {
+                    for (int x = 0; x < dungeon_width; x++) {
+                        if (dungeon_matrix[x,y] != null) {
+                            bw.Write(dungeon_matrix[x, y].up);
+                            bw.Write(dungeon_matrix[x, y].right);
+                            bw.Write(dungeon_matrix[x, y].down);
+                            bw.Write(dungeon_matrix[x, y].left);
+                        }else {
+                            bw.Write(blank_tile.up);
+                            bw.Write(blank_tile.right);
+                            bw.Write(blank_tile.down);
+                            bw.Write(blank_tile.left);
+                        }
+                    }
+                }
+                bw.Close();
+            }
+        }
+
+        static public Tile[,] setDungeonMatrix() {
+            dungeon_matrix = new Tile[(max_x_position - min_x_position), (max_y_position - min_y_position)];
+            int tile_x_rel_position;
+            int tile_y_rel_position;
+            int tile_position;
+            foreach (Room room in rooms_in_dungeon) {
+                tile_x_rel_position = room.position_x - min_x_position;
+                tile_y_rel_position = room.position_y - min_y_position;
+                tile_position = 0;
+                for (int y = 0; y < room.height; y++) {
+                    for (int x = 0; x < room.width; x++) {
+                        dungeon_matrix[tile_x_rel_position + x, tile_y_rel_position + y] = room.floor[tile_position];
+                        tile_position++;
+                    }
+                }
+            }
+            return dungeon_matrix;
         }
     }
 
     public class Navigation {
         static public System.Random pseudoRandom;
-        static public int getRoomSize() {
-            /* From 5 to 20 */
-            int number = getRandomNormalNumber();
-            if (number > 20) number = 20;
-            if (number < 5) number = 5;
-            return number;
-        }
         static public int getRandomNormalNumber() {
             /* Used for room sizes*/
             /*Special thanks to Superbest random:
@@ -187,6 +244,14 @@ namespace DungeonGenerator {
     }
 
     public class DungeonTools {
+        static public int getRoomSize() {
+            /* From 5 to 20 */
+            int number = Navigation.getRandomNormalNumber();
+            if (number > 20) number = 20;
+            if (number < 5) number = 5;
+            return number;
+        }
+
         static public bool detectDungeonCollision(Room room, List<Room> room_list) {
             bool exit_value = false;
             int room_count = 0;
@@ -321,8 +386,8 @@ namespace DungeonGenerator {
             room.floor[pillarTile + room.width + 1].left = 1;
         }
 
-        static public void addPillarsToRoom(Room room) {
-            int direction = Navigation.getDirection();
+        static public void addPillarsToRoom(Room room, System.Random pseudorandom) {
+            int direction = pseudorandom.Next(0, 5);
             int starting_x_separation = Navigation.pseudoRandom.Next(1, 3);
             int starting_y_separation = Navigation.pseudoRandom.Next(1, 3);
 
@@ -409,8 +474,8 @@ namespace DungeonGenerator {
         static public void insertRoomInsideRoom(Room room) {
             int innerRoom_X_Position;
             int innerRoom_Y_Position;
-            int innerRoomWidth = Navigation.getRoomSize();
-            int innerRoomHeight = Navigation.getRoomSize();
+            int innerRoomWidth = getRoomSize();
+            int innerRoomHeight = getRoomSize();
             int tries = 0;
             bool collision = true; // innerRoom must be fully inside room
             bool door_set = false; // it could occur there is no space left for a door
@@ -448,7 +513,7 @@ namespace DungeonGenerator {
             int tries = 0;
 
             do {
-                direction = Navigation.getDirection();
+                direction = pseudoRandom.Next(0, 5);
                 switch (direction) {
                     case 0: //UP
                         depth = pseudoRandom.Next(1, innerRoom.width - 1);
@@ -460,7 +525,7 @@ namespace DungeonGenerator {
                         break;
                     case 1: //RIGHT
                         depth = pseudoRandom.Next(1, innerRoom.height - 1);
-                        if (room.floor[(innerRoom.position_x + innerRoom.width - room.position_x) + ((innerRoom.position_y - room.position_y + depth) * room.width)].down != 1) {
+                        if (room.floor[(innerRoom.position_x + innerRoom.width - room.position_x) + ((innerRoom.position_y - room.position_y + depth) * room.width)].left != 1) {
                             setDoorInRoom(innerRoom, 1, innerRoom.position_x + innerRoom.width - 1, innerRoom.position_y + depth);
                             setDoorInRoom(room, 3, innerRoom.position_x + innerRoom.width, innerRoom.position_y + depth);
                             door_set = true;
@@ -468,7 +533,7 @@ namespace DungeonGenerator {
                         break;
                     case 2: //DOWN
                         depth = pseudoRandom.Next(1, innerRoom.width - 1);
-                        if (room.floor[(innerRoom.position_x - room.position_x + depth) + ((innerRoom.position_y + innerRoom.height - room.position_y) * room.width)].down != 1) {
+                        if (room.floor[(innerRoom.position_x - room.position_x + depth) + ((innerRoom.position_y + innerRoom.height - room.position_y) * room.width)].up != 1) {
                             setDoorInRoom(innerRoom, 2, innerRoom.position_x + depth, innerRoom.position_y + innerRoom.height - 1);
                             setDoorInRoom(room, 0, innerRoom.position_x + depth, innerRoom.position_y + innerRoom.height);
                             door_set = true;
@@ -476,7 +541,7 @@ namespace DungeonGenerator {
                         break;
                     case 3: //LEFT
                         depth = pseudoRandom.Next(1, innerRoom.height - 1);
-                        if (room.floor[(innerRoom.position_x - room.position_x - 1) + ((innerRoom.position_y - room.position_y + depth) * room.width)].down != 1) {
+                        if (room.floor[(innerRoom.position_x - room.position_x - 1) + ((innerRoom.position_y - room.position_y + depth) * room.width)].right != 1) {
                             setDoorInRoom(innerRoom, 3, innerRoom.position_x, innerRoom.position_y + depth);
                             setDoorInRoom(room, 1, innerRoom.position_x - 1, innerRoom.position_y + depth);
                             door_set = true;
@@ -504,15 +569,16 @@ namespace DungeonGenerator {
             Navigation.pseudoRandom = new System.Random(seed.GetHashCode());
             Dungeon.initializeDungeon();
 
-            while (position < Dungeon.rooms_in_dungeon.Count && Dungeon.rooms_in_dungeon[position].depth < 10) {
+            while (position < Dungeon.rooms_in_dungeon.Count && Dungeon.rooms_in_dungeon[position].depth < 5) {
                 Dungeon.rooms_in_dungeon[position].reproduct();
                 position++;
             }
             for (int x = 0; x < Dungeon.rooms_in_dungeon.Count; x++) {
-                if (!Dungeon.rooms_in_dungeon[x].isInnerRoom) DungeonTools.addPillarsToRoom(Dungeon.rooms_in_dungeon[x]);
+                if (!Dungeon.rooms_in_dungeon[x].isInnerRoom) DungeonTools.addPillarsToRoom(Dungeon.rooms_in_dungeon[x], Navigation.pseudoRandom);
                 DungeonTools.insertRoomInsideRoom(Dungeon.rooms_in_dungeon[x]);                
             }
             DungeonTools.connectAdjacentRooms(Dungeon.rooms_in_dungeon, Navigation.pseudoRandom);
+            Dungeon.saveDungeonFile();
         }
 
         void OnDrawGizmos() {
