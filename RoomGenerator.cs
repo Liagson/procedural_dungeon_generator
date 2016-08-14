@@ -364,7 +364,7 @@ namespace DungeonGenerator {
         static public void setPillarInRoom(Room room, int room_x_position, int room_y_position) {
             int pillarTile = room_x_position + (room.width * room_y_position);
 
-            //TODO: Needs adjacent tiles with wall too!
+            //TODO: Use setWallAroundObject() instead
             room.floor[pillarTile].up = 1;
             room.floor[pillarTile].left = 1;
             room.floor[pillarTile].down = 1;
@@ -384,6 +384,8 @@ namespace DungeonGenerator {
             room.floor[pillarTile + room.width + 1].right = 1;
             room.floor[pillarTile + room.width + 1].up = 1;
             room.floor[pillarTile + room.width + 1].left = 1;
+
+            //setWallAroundObject(room, room.position_x + room_x_position, room.position_y + room_y_position, 2, 2);
         }
 
         static public void addPillarsToRoom(Room room, System.Random pseudorandom) {
@@ -471,6 +473,33 @@ namespace DungeonGenerator {
             
         }
 
+        static public void setWallAroundObject(Room room, int pos_x_obj, int pos_y_obj, int obj_width, int obj_height) {
+            int tile_with_wall;
+            tile_with_wall = (pos_x_obj - room.position_x) + ((pos_y_obj - room.position_y - 1) * room.width);
+            for (int x = 0; x < obj_width; x++) {
+                if (room.floor[tile_with_wall + x].down != 2) //Don't overwrite doors
+                    room.floor[tile_with_wall + x].down = 1;
+            } 
+
+            tile_with_wall += (room.width - 1);
+            for (int y = 0; y < obj_height; y++) {
+                if (room.floor[tile_with_wall + (room.width * y)].right != 2)
+                    room.floor[tile_with_wall + (room.width * y)].right = 1;
+            } 
+
+            tile_with_wall += (obj_width + 1);
+            for (int y = 0; y < obj_height; y++) {
+                if (room.floor[tile_with_wall + (room.width * y)].left != 2)
+                    room.floor[tile_with_wall + (room.width * y)].left = 1;
+            } 
+
+            tile_with_wall += ((obj_height * room.width) - obj_width);
+            for (int x = 0; x < obj_width; x++) {
+                if (room.floor[tile_with_wall + x].up != 2)
+                    room.floor[tile_with_wall + x].up = 1;
+            } 
+        }
+
         static public void insertRoomInsideRoom(Room room) {
             int innerRoom_X_Position;
             int innerRoom_Y_Position;
@@ -490,15 +519,17 @@ namespace DungeonGenerator {
                     tries++;
                 } while (tries < 5 && collision);
                 if (!collision) {
-                    //TODO: Needs adjacent tiles with wall too!
                     Room innerRoom = new Room(innerRoom_X_Position + room.position_x, innerRoom_Y_Position + room.position_y, innerRoomHeight, innerRoomWidth);
-                    room.inner_rooms.Add(Dungeon.rooms_in_dungeon.Count);
                     innerRoom.id = Dungeon.rooms_in_dungeon.Count;
                     innerRoom.isInnerRoom = true;
                     innerRoom.fillRoom();
 
                     door_set = setDoorInInnerRoom(room, innerRoom, Navigation.pseudoRandom);
-                    if (door_set) Dungeon.rooms_in_dungeon.Add(innerRoom);
+                    if (door_set) {
+                        room.inner_rooms.Add(Dungeon.rooms_in_dungeon.Count);
+                        //setWallAroundObject(room, innerRoom.position_x, innerRoom.position_y, innerRoom.width, innerRoom.height);
+                        Dungeon.rooms_in_dungeon.Add(innerRoom);
+                    } 
                 }
             }
         }
