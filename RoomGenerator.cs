@@ -468,9 +468,7 @@ namespace DungeonGenerator {
                         }
                     }
                     break;
-            }
-            
-            
+            } 
         }
 
         static public void setWallAroundObject(Room room, int pos_x_obj, int pos_y_obj, int obj_width, int obj_height) {
