@@ -8,8 +8,6 @@ namespace DungeonTesting {
 
         /*DungeonTools*/
 
-        //int y; // Not used
-        //int x;
         Room room;
         Room room_A;
         Room room_B;
@@ -19,31 +17,7 @@ namespace DungeonTesting {
         static string seed = "test";
         System.Random pseudoRandom = new System.Random(seed.GetHashCode());
 
-        /* A. isPointInsideRoom() */
-        //Not used
-        //[TestMethod]
-        //public void pointInsideRoomDetection() {
-        //    x = 2;
-        //    y = 2;
-        //    room = new Room(0, 0, 4, 4);
-        //    Assert.AreEqual(true, DungeonTools.isPointInsideRoom(x, y, room), "Point inside the room");
-        //}
-        //[TestMethod]
-        //public void pointNotInsideRoomDetection() {
-        //    x = 10;
-        //    y = 10;
-        //    room = new Room(0, 0, 5, 5);
-        //    Assert.AreEqual(false, DungeonTools.isPointInsideRoom(x, y, room), "Point not inside the room");
-        //}
-        //[TestMethod]
-        //public void pointIsAdjacentDetection() {
-        //    x = 0;
-        //    y = 0;
-        //    room = new Room(0, 0, 5, 5);
-        //    Assert.AreEqual(false, DungeonTools.isPointInsideRoom(x, y, room), "If the point is 'inside' the border there is no collision");
-        //}
-
-        /* B. detect2RoomCollision() */
+        /* A. detect2RoomCollision() */
         [TestMethod]
         public void roomIsInsideDetection() {
             room_A = new Room(5, 5, 2, 2);
@@ -89,7 +63,7 @@ namespace DungeonTesting {
             Assert.AreEqual(true, DungeonTools.detect2RoomCollision(room_A, room_B), "Room A crosses B");
         }
 
-        /* C. detectDungeonCollision() */
+        /* B. detectDungeonCollision() */
         [TestMethod]
         public void detectCollisionsInDungeon() {
             room_list = new List<Room>();
@@ -107,18 +81,8 @@ namespace DungeonTesting {
             room = new Room(0, 0, 5, 5);
             Assert.AreEqual(true, DungeonTools.detectDungeonCollision(room, room_list), "Double collision");
         }
-
-        /* D. getRandomTileInBorderOfRoom() */
-        //Not used
-        //[TestMethod]
-        //public void functionReturnsAlwaysADoor() {
-        //    room = new Room(0, 0, 20, 20);
-        //    room.fillRoom();
-        //    /* 0: UP  1: RIGHT 2: DOWN 3: LEFT */
-        //    Assert.AreNotEqual(-1, DungeonTools.getRandomTileInBorderOfRoom(room, pseudoRandom, 0), "Room returns a not null tile for door (UP)");
-        //}
-
-        /* E. setDoorInRoom() */
+        
+        /* C. setDoorInRoom() */
         [TestMethod]
         public void functionSetsDoorCorrectly() {
             room = new Room(0, 0, 10, 10);
@@ -134,7 +98,7 @@ namespace DungeonTesting {
             Assert.AreEqual(2, room.floor[20].left, "Tile with door (LEFT)");
         }
 
-        /* F. linkRooms() */
+        /* D. linkRooms() */
         [TestMethod]
         public void uniteAdjacentRoomsWithDoor() {
             room_A = new Room(0, 0, 3, 3);
@@ -174,7 +138,7 @@ namespace DungeonTesting {
             Assert.AreEqual(2, room_B.floor[5].right, "Second room (RIGHT)");
         }
 
-        /* G. connectAdjacentRooms() */
+        /* E. connectAdjacentRooms() */
         [TestMethod]
         public void searchAndUniteAdjacentRoomsWithDoor() {
             room_list = new List<Room>();
@@ -191,7 +155,7 @@ namespace DungeonTesting {
             Assert.AreEqual(2, room_B.floor[1].up, "Second room (UP)");
         }
 
-        /* H. setDoorInInnerRoom() */
+        /* F. setDoorInInnerRoom() */
         [TestMethod]
         public void settingADoorInTheInnerRoomCheck() {
             room = new Room(0, 0, 4, 4);
@@ -213,7 +177,7 @@ namespace DungeonTesting {
             Assert.AreEqual(true, DungeonTools.setDoorInInnerRoom(room, room_A, pseudoRandom), "Space left for the door");
         }
 
-        /* I. setWallAroundObject() */
+        /* G. setWallAroundObject() */
         [TestMethod]
         public void settingAWallAroundAnObjectCheck() {
             room = new Room(0, 0, 4, 4);
