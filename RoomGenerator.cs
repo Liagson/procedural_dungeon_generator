@@ -36,6 +36,9 @@ namespace DungeonGenerator {
         public bool isInnerRoom = false;
         public List<int> inner_rooms = new List<int>();
 
+        public bool isBumpRoom = false;
+        public List<int> bump_rooms = new List<int>();
+
         public Room(int x, int y, int height, int width) {
             position_x = x;
             position_y = y;
@@ -44,16 +47,24 @@ namespace DungeonGenerator {
         }
 
         public void reproduct() {
+            int chance;
             if (this.depth != 0 && this.depth < 3) {
-                create_child_room();
+                create_child_room(false);
             } else { /*Three paths in the starting room */
-                create_child_room();
-                create_child_room();
-                create_child_room();
+                create_child_room(false);
+                create_child_room(false);
+                create_child_room(false);
+            }
+            // 1/4 chance of getting a bump. Max 2.
+            for (int x = 0; x < 2; x++) {
+                chance = Navigation.pseudoRandom.Next(0, 4);
+                if (chance < 5) {
+                    create_child_room(true);
+                }
             }
         }
 
-        public void create_child_room() {
+        public bool create_child_room(bool isBump) {
             int direction;
             int child_width;
             int child_height;
@@ -98,6 +109,7 @@ namespace DungeonGenerator {
                 child_room = new Room(pos_x_son, pos_y_son, child_height, child_width);
                 child_room.id = Dungeon.rooms_in_dungeon.Count;
                 child_room.depth = this.depth + 1;
+                child_room.isBumpRoom = isBump;
 
                 number_of_tries++;
                 //Ensure there's no collision before adding the room to the dungeon!
@@ -128,10 +140,15 @@ namespace DungeonGenerator {
                 if (child_room.position_y < Dungeon.min_y_position) Dungeon.min_y_position = child_room.position_y;
                 if (child_room.position_x + child_room.width > Dungeon.max_x_position) Dungeon.max_x_position = child_room.position_x + child_room.width;
                 if (child_room.position_y + child_room.height > Dungeon.max_y_position) Dungeon.max_y_position = child_room.position_y + child_room.height;
+                if (isBump) {
+                    this.bump_rooms.Add(child_room.id);
+                    DungeonTools.mergeBumpRoom(this, child_room, direction);
+                }
+
                 Dungeon.rooms_in_dungeon.Add(child_room);
                 this.child_rooms.Add(child_room.id);
             }
-            
+            return !collision;
         }
 
         public void fillRoom() {
@@ -280,7 +297,10 @@ namespace DungeonGenerator {
                                 (room_list[current_position].position_x + room_list[current_position].width > room_list[pivot_room].position_x)) {
                                 //Don't connect father-child rooms
                                 if ((!room_list[pivot_room].child_rooms.Contains(room_list[current_position].id)) && (!room_list[current_position].child_rooms.Contains(room_list[pivot_room].id))) {
-                                    link2Rooms(room_list[pivot_room], room_list[current_position], 2, pseudoRandom);
+                                    //Bump rooms don't connect to other rooms. For now.
+                                    if (!room_list[pivot_room].isBumpRoom && !room_list[current_position].isBumpRoom) {
+                                        link2Rooms(room_list[pivot_room], room_list[current_position], 2, pseudoRandom);
+                                    }
                                 }
                             }
                         } else if (room_list[pivot_room].position_x + room_list[pivot_room].width == room_list[current_position].position_x) {
@@ -289,7 +309,10 @@ namespace DungeonGenerator {
                                 (room_list[current_position].position_y + room_list[current_position].height > room_list[pivot_room].position_y)) {
                                 //Don't connect father-child rooms
                                 if ((!room_list[pivot_room].child_rooms.Contains(room_list[current_position].id)) && (!room_list[current_position].child_rooms.Contains(room_list[pivot_room].id))) {
-                                    link2Rooms(room_list[pivot_room], room_list[current_position], 1, pseudoRandom);
+                                    //Bump rooms don't connect to other rooms. For now.
+                                    if (!room_list[pivot_room].isBumpRoom && !room_list[current_position].isBumpRoom) {
+                                        link2Rooms(room_list[pivot_room], room_list[current_position], 1, pseudoRandom);
+                                    }   
                                 }
                             }
                         }
@@ -582,6 +605,59 @@ namespace DungeonGenerator {
             
             return door_set;
         }
+
+        static public void mergeBumpRoom(Room room, Room bump_room, int direction) {
+            /* merge 2 rooms without using doors (TEAR DOWN THE WALL)*/
+            /* room -> direction -> bump_room */
+            int max_pos_x = 0;
+            int max_pos_y = 0;
+            int min_pos_x_width = 0;
+            int min_pos_y_height = 0;
+
+            switch (direction) {
+                case 1: case 3:
+                    if (room.position_y > bump_room.position_y) max_pos_y = room.position_y;
+                    else max_pos_y = bump_room.position_y;
+                    if (room.position_y + room.height < bump_room.position_y + bump_room.height)
+                        min_pos_y_height = room.position_y + room.height;
+                    else min_pos_y_height = bump_room.position_y + bump_room.height;
+                    break;
+                case 0: case 2:
+                    if (room.position_x > bump_room.position_x) max_pos_x = room.position_x;
+                    else max_pos_x = bump_room.position_x;
+                    if (room.position_x + room.width < bump_room.position_x + bump_room.width)
+                        min_pos_x_width = room.position_x + room.width;
+                    else min_pos_x_width = bump_room.position_x + bump_room.width;
+                    break;
+            }
+
+            switch (direction) {
+                case 0:
+                    for (int x = 0; x < (min_pos_x_width - max_pos_x); x++) {
+                        room.floor[max_pos_x - room.position_x + x].up = 0;
+                        bump_room.floor[bump_room.width * (bump_room.height - 1) + (max_pos_x - bump_room.position_x + x)].down = 0;
+                    }
+                    break;
+                case 1:
+                    for (int y = 0; y < (min_pos_y_height - max_pos_y); y++) {
+                        room.floor[(room.width - 1) + room.width * ((max_pos_y + y) - room.position_y)].right = 0;
+                        bump_room.floor[bump_room.width * ((max_pos_y + y) - bump_room.position_y)].left = 0;
+                    }
+                    break;
+                case 2:
+                    for (int x = 0; x < (min_pos_x_width - max_pos_x); x++) {
+                        room.floor[room.width * (room.height - 1) + (max_pos_x - room.position_x + x)].down = 0;
+                        bump_room.floor[max_pos_x - bump_room.position_x + x].up = 0;
+                    }
+                    break;
+                case 3:
+                    for (int y = 0; y < (min_pos_y_height - max_pos_y); y++) {
+                        room.floor[room.width * ((max_pos_y + y) - room.position_y)].left = 0;
+                        bump_room.floor[(bump_room.width - 1) + bump_room.width * ((max_pos_y + y) - bump_room.position_y)].right = 0;
+                    }
+                    break;
+            }
+        }
     }
 
     public class RoomGenerator : MonoBehaviour {
@@ -598,7 +674,7 @@ namespace DungeonGenerator {
             Navigation.pseudoRandom = new System.Random(seed.GetHashCode());
             Dungeon.initializeDungeon();
 
-            while (position < Dungeon.rooms_in_dungeon.Count && Dungeon.rooms_in_dungeon[position].depth < 5) {
+            while (position < Dungeon.rooms_in_dungeon.Count && Dungeon.rooms_in_dungeon[position].depth < 1) {
                 Dungeon.rooms_in_dungeon[position].reproduct();
                 position++;
             }

@@ -192,5 +192,54 @@ namespace DungeonTesting {
             Assert.AreEqual(1, room.floor[13].up, "Up 1");
             Assert.AreEqual(1, room.floor[14].up, "Up 2");
         }
+
+        /* H. mergeBumpRoom() */
+        [TestMethod]
+        public void mergeBumpRoomCheck() {
+            room_A = new Room(0, 3, 3, 3);
+            room_B = new Room(1, 0, 3, 3);
+            room_A.fillRoom();
+            room_B.fillRoom();
+
+            DungeonTools.mergeBumpRoom(room_A, room_B, 0);
+            Assert.AreEqual(0, room_A.floor[1].up, "Right wall merge (0) - 1");
+            Assert.AreEqual(0, room_A.floor[2].up, "Right wall merge (0) - 2");
+            Assert.AreEqual(0, room_B.floor[6].down, "Left wall merge (0) - 1");
+            Assert.AreEqual(0, room_B.floor[7].down, "Left wall merge (0) - 2");
+
+            room_A = new Room(0, 0, 3, 3);
+            room_B = new Room(3, 1, 3, 3);
+            room_A.fillRoom();
+            room_B.fillRoom();
+
+            DungeonTools.mergeBumpRoom(room_A, room_B, 1);
+            Assert.AreEqual(0, room_A.floor[5].right, "Right wall merge (1) - 1");
+            Assert.AreEqual(0, room_A.floor[8].right, "Right wall merge (1) - 2");
+            Assert.AreEqual(0, room_B.floor[0].left, "Left wall merge (1) - 1");
+            Assert.AreEqual(0, room_B.floor[3].left, "Left wall merge (1) - 2");
+
+            room_A = new Room(0, 0, 3, 3);
+            room_B = new Room(1, 3, 3, 3);
+            room_A.fillRoom();
+            room_B.fillRoom();
+
+            DungeonTools.mergeBumpRoom(room_A, room_B, 2);
+            Assert.AreEqual(0, room_A.floor[7].down, "Down wall merge (2) - 1");
+            Assert.AreEqual(0, room_A.floor[8].down, "Down wall merge (2) - 2");
+            Assert.AreEqual(0, room_B.floor[0].up, "Up wall merge (2) - 1");
+            Assert.AreEqual(0, room_B.floor[1].up, "Up wall merge (2) - 2");
+
+            room_A = new Room(3, 0, 3, 3);
+            room_B = new Room(0, 1, 3, 3);
+            room_A.fillRoom();
+            room_B.fillRoom();
+
+            DungeonTools.mergeBumpRoom(room_A, room_B, 3);
+            Assert.AreEqual(0, room_A.floor[3].left, "Left wall merge (3) - 1");
+            Assert.AreEqual(0, room_A.floor[6].left, "Left wall merge (3) - 2");
+            Assert.AreEqual(0, room_B.floor[2].right, "Right wall merge (3) - 1");
+            Assert.AreEqual(0, room_B.floor[5].right, "Right wall merge (3) - 2");
+
+        }
     }
 }
