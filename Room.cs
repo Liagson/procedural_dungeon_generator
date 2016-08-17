@@ -63,8 +63,15 @@ namespace DungeonGenerator {
 
             do {
                 direction = Navigation.getDirection();
-                child_width = DungeonTools.getRoomSize();
-                child_height = DungeonTools.getRoomSize();
+                if (isBump) {
+                    //Bump rooms use uniform distribution sizes
+                    child_width = Navigation.pseudoRandom.Next(3, 10);
+                    child_height = Navigation.pseudoRandom.Next(3, 10);
+                }else {
+                    //Rest of the rooms use normal distribution sizes
+                    child_width = DungeonTools.getRoomSize();
+                    child_height = DungeonTools.getRoomSize();
+                }
                 switch (direction) {
                     case 0:
                         tile_with_door = Navigation.pseudoRandom.Next(1, this.width - 2);

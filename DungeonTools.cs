@@ -162,76 +162,77 @@ namespace DungeonGenerator {
             int current_x_position;
             int current_y_position;
 
+            if (room.width > 4 && room.height > 4) {
+                switch (direction) {
+                    case 0: //Down -> Up
+                        starting_x_position = room.width - starting_x_separation - 2;
+                        starting_y_position = room.height - starting_y_separation - 2;
+                        current_y_position = starting_y_position;
 
-            switch (direction) {
-                case 0: //Down -> Up
-                    starting_x_position = room.width - starting_x_separation - 2;
-                    starting_y_position = room.height - starting_y_separation - 2;
-                    current_y_position = starting_y_position;
-
-                    setPillarInRoom(room, starting_x_position, starting_y_position);
-                    if (starting_x_separation < starting_x_position - 4) {
-                        setPillarInRoom(room, starting_x_separation, starting_y_position);
-                    }
-                    while (current_y_position - 4 > 0) {
-                        current_y_position -= 4;
-                        setPillarInRoom(room, starting_x_position, current_y_position);
+                        setPillarInRoom(room, starting_x_position, starting_y_position);
                         if (starting_x_separation < starting_x_position - 4) {
-                            setPillarInRoom(room, starting_x_separation, current_y_position);
+                            setPillarInRoom(room, starting_x_separation, starting_y_position);
                         }
-                    }
-                    break;
-                case 1: //Left -> Right
-                    starting_x_position = starting_x_separation;
-                    starting_y_position = starting_y_separation;
-                    current_x_position = starting_x_position;
+                        while (current_y_position - 4 > 0) {
+                            current_y_position -= 4;
+                            setPillarInRoom(room, starting_x_position, current_y_position);
+                            if (starting_x_separation < starting_x_position - 4) {
+                                setPillarInRoom(room, starting_x_separation, current_y_position);
+                            }
+                        }
+                        break;
+                    case 1: //Left -> Right
+                        starting_x_position = starting_x_separation;
+                        starting_y_position = starting_y_separation;
+                        current_x_position = starting_x_position;
 
-                    setPillarInRoom(room, starting_x_position, starting_y_position);
-                    if (room.height > starting_y_position + 6) {
-                        setPillarInRoom(room, starting_x_position, room.height - starting_y_position - 2);
-                    }
-                    while (current_x_position + 6 < room.width) {
-                        current_x_position += 4;
-                        setPillarInRoom(room, current_x_position, starting_y_position);
+                        setPillarInRoom(room, starting_x_position, starting_y_position);
                         if (room.height > starting_y_position + 6) {
-                            setPillarInRoom(room, current_x_position, room.height - starting_y_position - 2);
+                            setPillarInRoom(room, starting_x_position, room.height - starting_y_position - 2);
                         }
-                    }
-                    break;
-                case 2: //Up -> Down
-                    starting_x_position = starting_x_separation;
-                    starting_y_position = starting_y_separation;
-                    current_y_position = starting_y_position;
+                        while (current_x_position + 6 < room.width) {
+                            current_x_position += 4;
+                            setPillarInRoom(room, current_x_position, starting_y_position);
+                            if (room.height > starting_y_position + 6) {
+                                setPillarInRoom(room, current_x_position, room.height - starting_y_position - 2);
+                            }
+                        }
+                        break;
+                    case 2: //Up -> Down
+                        starting_x_position = starting_x_separation;
+                        starting_y_position = starting_y_separation;
+                        current_y_position = starting_y_position;
 
-                    setPillarInRoom(room, starting_x_position, starting_y_position);
-                    if (room.width > starting_x_position + 6) {
-                        setPillarInRoom(room, room.width - starting_x_position - 2, starting_y_position);
-                    }
-                    while (current_y_position + 6 < room.height) {
-                        current_y_position += 4;
-                        setPillarInRoom(room, starting_x_position, current_y_position);
+                        setPillarInRoom(room, starting_x_position, starting_y_position);
                         if (room.width > starting_x_position + 6) {
-                            setPillarInRoom(room, room.width - starting_x_position - 2, current_y_position);
+                            setPillarInRoom(room, room.width - starting_x_position - 2, starting_y_position);
                         }
-                    }
-                    break;
-                case 3: // Right -> Left
-                    starting_x_position = room.width - starting_x_separation - 2;
-                    starting_y_position = room.height - starting_y_separation - 2;
-                    current_x_position = starting_x_position;
+                        while (current_y_position + 6 < room.height) {
+                            current_y_position += 4;
+                            setPillarInRoom(room, starting_x_position, current_y_position);
+                            if (room.width > starting_x_position + 6) {
+                                setPillarInRoom(room, room.width - starting_x_position - 2, current_y_position);
+                            }
+                        }
+                        break;
+                    case 3: // Right -> Left
+                        starting_x_position = room.width - starting_x_separation - 2;
+                        starting_y_position = room.height - starting_y_separation - 2;
+                        current_x_position = starting_x_position;
 
-                    setPillarInRoom(room, starting_x_position, starting_y_position);
-                    if (starting_y_separation < starting_y_position - 4) {
-                        setPillarInRoom(room, starting_x_position, starting_y_separation);
-                    }
-                    while (current_x_position - 4 > 0) {
-                        current_x_position -= 4;
-                        setPillarInRoom(room, current_x_position, starting_y_position);
+                        setPillarInRoom(room, starting_x_position, starting_y_position);
                         if (starting_y_separation < starting_y_position - 4) {
-                            setPillarInRoom(room, current_x_position, starting_y_separation);
+                            setPillarInRoom(room, starting_x_position, starting_y_separation);
                         }
-                    }
-                    break;
+                        while (current_x_position - 4 > 0) {
+                            current_x_position -= 4;
+                            setPillarInRoom(room, current_x_position, starting_y_position);
+                            if (starting_y_separation < starting_y_position - 4) {
+                                setPillarInRoom(room, current_x_position, starting_y_separation);
+                            }
+                        }
+                        break;
+                }
             }
         }
 
