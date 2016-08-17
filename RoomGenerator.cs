@@ -24,7 +24,7 @@ namespace DungeonGenerator {
             for (int x = 0; x < Dungeon.rooms_in_dungeon.Count; x++) {
                 if (!Dungeon.rooms_in_dungeon[x].isInnerRoom) {
                     chance = Navigation.pseudoRandom.Next(0, 10);
-                    if (chance > 5) DungeonTools.addPillarsToRoom(Dungeon.rooms_in_dungeon[x], Navigation.pseudoRandom);
+                    if (chance > 3) DungeonTools.addPillarsToRoom(Dungeon.rooms_in_dungeon[x], Navigation.pseudoRandom);
                     DungeonTools.insertRoomInsideRoom(Dungeon.rooms_in_dungeon[x]);
                 }
             }

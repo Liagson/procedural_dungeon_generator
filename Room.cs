@@ -65,8 +65,8 @@ namespace DungeonGenerator {
                 direction = Navigation.getDirection();
                 if (isBump) {
                     //Bump rooms use uniform distribution sizes
-                    child_width = Navigation.pseudoRandom.Next(3, 10);
-                    child_height = Navigation.pseudoRandom.Next(3, 10);
+                    child_width = Navigation.pseudoRandom.Next(3, 6);
+                    child_height = Navigation.pseudoRandom.Next(3, 6);
                 }else {
                     //Rest of the rooms use normal distribution sizes
                     child_width = DungeonTools.getRoomSize();

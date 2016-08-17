@@ -38,8 +38,8 @@ namespace DungeonGenerator {
                                 (room_list[current_position].position_x + room_list[current_position].width > room_list[pivot_room].position_x)) {
                                 //Don't connect father-child rooms
                                 if ((!room_list[pivot_room].child_rooms.Contains(room_list[current_position].id)) && (!room_list[current_position].child_rooms.Contains(room_list[pivot_room].id))) {
-                                    //Bump rooms don't connect to other rooms. For now.
-                                    if (!room_list[pivot_room].isBumpRoom && !room_list[current_position].isBumpRoom) {
+                                    //Bump rooms don't connect to bump rooms. For now.
+                                    if (!(room_list[pivot_room].isBumpRoom && room_list[current_position].isBumpRoom)) {
                                         link2Rooms(room_list[pivot_room], room_list[current_position], 2, pseudoRandom);
                                     }
                                 }
@@ -50,8 +50,8 @@ namespace DungeonGenerator {
                                 (room_list[current_position].position_y + room_list[current_position].height > room_list[pivot_room].position_y)) {
                                 //Don't connect father-child rooms
                                 if ((!room_list[pivot_room].child_rooms.Contains(room_list[current_position].id)) && (!room_list[current_position].child_rooms.Contains(room_list[pivot_room].id))) {
-                                    //Bump rooms don't connect to other rooms. For now.
-                                    if (!room_list[pivot_room].isBumpRoom && !room_list[current_position].isBumpRoom) {
+                                    //Bump rooms don't connect to bump rooms. For now.
+                                    if (!(room_list[pivot_room].isBumpRoom && room_list[current_position].isBumpRoom)) {
                                         link2Rooms(room_list[pivot_room], room_list[current_position], 1, pseudoRandom);
                                     }
                                 }
@@ -128,7 +128,6 @@ namespace DungeonGenerator {
         static public void setPillarInRoom(Room room, int room_x_position, int room_y_position) {
             int pillarTile = room_x_position + (room.width * room_y_position);
 
-            //TODO: Use setWallAroundObject() instead
             room.floor[pillarTile].up = 1;
             room.floor[pillarTile].left = 1;
             room.floor[pillarTile].down = 1;
@@ -280,7 +279,7 @@ namespace DungeonGenerator {
                         collision = false;
                     }
                     tries++;
-                } while (tries < 5 && collision);
+                } while (tries < 10 && collision);
                 if (!collision) {
                     Room innerRoom = new Room(innerRoom_X_Position + room.position_x, innerRoom_Y_Position + room.position_y, innerRoomHeight, innerRoomWidth);
                     innerRoom.id = Dungeon.rooms_in_dungeon.Count;
