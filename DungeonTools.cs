@@ -153,7 +153,7 @@ namespace DungeonGenerator {
         }
 
         static public void addPillarsToRoom(Room room, System.Random pseudorandom) {
-            int direction = pseudorandom.Next(0, 5);
+            int direction = pseudorandom.Next(0, 4);
             int starting_x_separation = Navigation.pseudoRandom.Next(1, 3);
             int starting_y_separation = Navigation.pseudoRandom.Next(1, 3);
 

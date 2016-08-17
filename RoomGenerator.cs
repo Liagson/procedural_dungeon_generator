@@ -13,16 +13,20 @@ namespace DungeonGenerator {
 
         public void buildRoom() {
             int position = 0;
+            int chance = 0;
             Navigation.pseudoRandom = new System.Random(seed.GetHashCode());
             Dungeon.initializeDungeon();
 
-            while (position < Dungeon.rooms_in_dungeon.Count && Dungeon.rooms_in_dungeon[position].depth < 1) {
+            while (position < Dungeon.rooms_in_dungeon.Count && Dungeon.rooms_in_dungeon[position].depth < 3) {
                 Dungeon.rooms_in_dungeon[position].reproduct();
                 position++;
             }
             for (int x = 0; x < Dungeon.rooms_in_dungeon.Count; x++) {
-                if (!Dungeon.rooms_in_dungeon[x].isInnerRoom) DungeonTools.addPillarsToRoom(Dungeon.rooms_in_dungeon[x], Navigation.pseudoRandom);
-                DungeonTools.insertRoomInsideRoom(Dungeon.rooms_in_dungeon[x]);                
+                if (!Dungeon.rooms_in_dungeon[x].isInnerRoom) {
+                    chance = Navigation.pseudoRandom.Next(0, 10);
+                    if (chance > 5) DungeonTools.addPillarsToRoom(Dungeon.rooms_in_dungeon[x], Navigation.pseudoRandom);
+                    DungeonTools.insertRoomInsideRoom(Dungeon.rooms_in_dungeon[x]);
+                }
             }
             DungeonTools.connectAdjacentRooms(Dungeon.rooms_in_dungeon, Navigation.pseudoRandom);
             Dungeon.saveDungeonFile();
