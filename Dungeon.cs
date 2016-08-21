@@ -8,6 +8,8 @@ namespace DungeonGenerator {
         public static int min_y_position = 0;
         public static int max_x_position = 0;
         public static int max_y_position = 0;
+        public static int start_x_position = 0;
+        public static int start_y_position = 0;
         private static Tile[,] dungeon_matrix;
 
         public static void initializeDungeon() {
@@ -29,10 +31,13 @@ namespace DungeonGenerator {
             string path = @"saveFile.txt";
             int dungeon_width = max_x_position - min_x_position;
             int dungeon_height = max_y_position - min_y_position;
+            setStartingPosition();
             Tile blank_tile = new Tile();
 
             setDungeonMatrix();
             using (BinaryWriter bw = new BinaryWriter(File.Open(path, FileMode.Create))) {
+                bw.Write(start_x_position);
+                bw.Write(start_y_position);
                 bw.Write(dungeon_width);
                 bw.Write(dungeon_height);
                 for (int y = 0; y < dungeon_height; y++) {
@@ -71,6 +76,15 @@ namespace DungeonGenerator {
                 }
             }
             return dungeon_matrix;
+        }
+
+        static public void setStartingPosition() {
+            int room = rooms_in_dungeon.Count - 1;
+            while (rooms_in_dungeon[room].isBumpRoom) {
+                room -= 1;
+            }
+            start_x_position = rooms_in_dungeon[room].position_x;
+            start_y_position = rooms_in_dungeon[room].position_y;
         }
     }
 }
