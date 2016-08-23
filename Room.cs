@@ -29,18 +29,22 @@ namespace DungeonGenerator {
 
         public void reproduct() {
             int chance;
-            if (this.depth != 0 && this.depth < 3) {
-                create_child_room(false);
-            } else { /*Three paths in the starting room */
-                create_child_room(false);
-                create_child_room(false);
-                create_child_room(false);
-            }
-            // 1/4 chance of getting a bump. Max 2.
-            for (int x = 0; x < 2; x++) {
-                chance = Navigation.pseudoRandom.Next(0, 4);
-                if (chance < 5) {
-                    create_child_room(true);
+            if (!(!(Dungeon.bumpsCanReproduce) && isBumpRoom)){
+                if (this.depth != 0 && this.depth < Dungeon.room_depth_before_multibranching) {
+                    create_child_room(false);
+                } else {
+                    create_child_room(false);
+                    create_child_room(false);
+                    create_child_room(false);
+                }
+
+                if (Dungeon.bumpsInDungeon) {
+                    for (int x = 0; x < Dungeon.max_number_of_bumps_per_room; x++) {
+                        chance = Navigation.pseudoRandom.Next(0, 100);
+                        if (chance < Dungeon.chance_of_bump) {
+                            create_child_room(true);
+                        }
+                    }
                 }
             }
         }
