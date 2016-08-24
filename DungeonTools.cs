@@ -39,6 +39,7 @@ namespace DungeonGenerator {
         }
 
         static public void connectAdjacentRooms(List<Room> room_list, System.Random pseudoRandom) {
+            int chance;
             for (int pivot_room = 0; pivot_room < room_list.Count - 1; pivot_room++) {
                 for (int current_position = 0; current_position < room_list.Count; current_position++) {
                     if ((current_position != pivot_room) && (!room_list[pivot_room].isInnerRoom) && (!room_list[current_position].isInnerRoom)) {
@@ -50,7 +51,10 @@ namespace DungeonGenerator {
                                 if ((!room_list[pivot_room].child_rooms.Contains(room_list[current_position].id)) && (!room_list[current_position].child_rooms.Contains(room_list[pivot_room].id))) {
                                     //Bump rooms don't connect to bump rooms. For now.
                                     if (!(room_list[pivot_room].isBumpRoom && room_list[current_position].isBumpRoom)) {
-                                        link2Rooms(room_list[pivot_room], room_list[current_position], 2, pseudoRandom);
+                                        chance = pseudoRandom.Next(0, 100);
+                                        if (chance < Dungeon.chance_of_room_door_merging) {
+                                            link2Rooms(room_list[pivot_room], room_list[current_position], 2, pseudoRandom);
+                                        }
                                     }
                                 }
                             }
@@ -62,7 +66,10 @@ namespace DungeonGenerator {
                                 if ((!room_list[pivot_room].child_rooms.Contains(room_list[current_position].id)) && (!room_list[current_position].child_rooms.Contains(room_list[pivot_room].id))) {
                                     //Bump rooms don't connect to bump rooms. For now.
                                     if (!(room_list[pivot_room].isBumpRoom && room_list[current_position].isBumpRoom)) {
-                                        link2Rooms(room_list[pivot_room], room_list[current_position], 1, pseudoRandom);
+                                        chance = pseudoRandom.Next(0, 100);
+                                        if (chance < Dungeon.chance_of_room_door_merging) {
+                                            link2Rooms(room_list[pivot_room], room_list[current_position], 1, pseudoRandom);
+                                        }
                                     }
                                 }
                             }

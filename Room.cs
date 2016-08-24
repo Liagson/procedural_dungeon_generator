@@ -69,8 +69,8 @@ namespace DungeonGenerator {
                 direction = Navigation.getDirection();
                 if (isBump) {
                     //Bump rooms use uniform distribution sizes
-                    child_width = Navigation.pseudoRandom.Next(3, 6);
-                    child_height = Navigation.pseudoRandom.Next(3, 6);
+                    child_width = Navigation.pseudoRandom.Next(Dungeon.bump_min_side, Dungeon.bump_max_side);
+                    child_height = Navigation.pseudoRandom.Next(Dungeon.bump_min_side, Dungeon.bump_max_side);
                 }else {
                     //Rest of the rooms use normal distribution sizes
                     child_width = DungeonTools.getRoomSize();
@@ -109,7 +109,8 @@ namespace DungeonGenerator {
             } while ((number_of_tries < max_number_of_tries) && collision);
 
             //Corridors may not be suited for the deepest graph nodes
-            if (DungeonTools.isCorridor(child_room) && child_room.depth > Dungeon.max_depth_for_corridors) {
+            if ((DungeonTools.isCorridor(child_room) && child_room.depth > Dungeon.max_depth_for_corridors)
+                || (child_room.isBumpRoom && !Dungeon.bumpsCanReproduce && DungeonTools.isCorridor(child_room))){ 
                 collision = true;
             } 
 
