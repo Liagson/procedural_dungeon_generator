@@ -10,6 +10,16 @@ namespace DungeonGenerator {
             return number;
         }
 
+        static public bool isCorridor(Room room) {
+            float ratio;
+            if (room.width > room.height) {
+                ratio = room.width / (float)room.height;
+            }else {
+                ratio = room.height / (float)room.width;
+            }
+            return (ratio > Dungeon.corridor_ratio);
+        }
+
         static public bool detectDungeonCollision(Room room, List<Room> room_list) {
             bool exit_value = false;
             int room_count = 0;

@@ -108,6 +108,11 @@ namespace DungeonGenerator {
                 collision = DungeonTools.detectDungeonCollision(child_room, Dungeon.rooms_in_dungeon);
             } while ((number_of_tries < max_number_of_tries) && collision);
 
+            //Corridors may not be suited for the deepest graph nodes
+            if (DungeonTools.isCorridor(child_room) && child_room.depth > Dungeon.max_depth_for_corridors) {
+                collision = true;
+            } 
+
             if (!collision) {
                 child_room.fillRoom();
                 switch (direction) {

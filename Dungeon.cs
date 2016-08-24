@@ -6,17 +6,23 @@ namespace DungeonGenerator {
         /* <Dungeon settings> */
 
         //General behavior
-        public const int dungeon_max_depth = 5;
+        public const int dungeon_max_depth = 4;
         public const int room_depth_before_multibranching = 3; // First rooms have only one child room
-        public const int chance_of_pillar = 75; // (%)
+
+        //Room atrezzo
+        public const int chance_of_pillar = 65; // (%)
         public const int chance_of_room_door_merging = 100; // (%)
         public const int chance_of_inner_room = 60; // (%) There has to be space for the room
 
+        //Corridors
+        public const float corridor_ratio = 2.5f;
+        public const int max_depth_for_corridors = dungeon_max_depth - 3;
+
         //Bumps
-        public const int chance_of_bump = 60; // (%)
-        public const int max_number_of_bumps_per_room = 3;
         public const bool bumpsInDungeon = true;
         public const bool bumpsCanReproduce = true; //true makes it more organic/cavern-like
+        public const int chance_of_bump = 60; // (%)
+        public const int max_number_of_bumps_per_room = 3;
 
         /* </Dungeon settings> */
 
