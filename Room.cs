@@ -29,7 +29,7 @@ namespace DungeonGenerator {
 
         public void reproduct() {
             int chance;
-            if (!(!(Dungeon.bumpsCanReproduce) && isBumpRoom)){
+            if (!((!Dungeon.bumpsCanReproduce) && isBumpRoom)){
                 if (this.depth != 0 && this.depth < Dungeon.room_depth_before_multibranching) {
                     create_child_room(false);
                 } else {

@@ -6,11 +6,11 @@ namespace DungeonGenerator {
         /* <Dungeon settings> */
 
         //General behavior
-        public const int dungeon_max_depth = 3;
+        public const int dungeon_max_depth = 5;
         public const int room_depth_before_multibranching = 3; // First rooms have only one child room
         public const int chance_of_pillar = 75; // (%)
         public const int chance_of_room_door_merging = 100; // (%)
-        public const int chance_of_inner_room = 100; // (%) There has to be space for the room
+        public const int chance_of_inner_room = 60; // (%) There has to be space for the room
 
         //Bumps
         public const int chance_of_bump = 60; // (%)

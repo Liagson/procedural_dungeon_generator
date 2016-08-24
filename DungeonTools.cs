@@ -265,16 +265,18 @@ namespace DungeonGenerator {
         static public void insertRoomInsideRoom(Room room) {
             int innerRoom_X_Position;
             int innerRoom_Y_Position;
-            int innerRoomWidth = getRoomSize();
-            int innerRoomHeight = getRoomSize();
+            int innerRoomWidth;
+            int innerRoomHeight;
             int tries = 0;
             bool collision = true; // innerRoom must be fully inside room
             bool door_set = false; // it could occur there is no space left for a door
             if (room.width > 7 && room.height > 7) {
                 do {
+                    innerRoomWidth = getRoomSize();
+                    innerRoomHeight = getRoomSize();
                     innerRoom_X_Position = Navigation.pseudoRandom.Next(1, room.width - 6);
                     innerRoom_Y_Position = Navigation.pseudoRandom.Next(1, room.height - 6);
-                    if (innerRoom_X_Position + innerRoomWidth < room.width &&
+                    if (innerRoom_X_Position + innerRoomWidth < room.width && 
                         innerRoom_Y_Position + innerRoomHeight < room.height) {
                         collision = false;
                     }
