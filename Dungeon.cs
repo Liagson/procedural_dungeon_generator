@@ -35,7 +35,7 @@ namespace DungeonGenerator {
         public static int max_y_position = 0;
         public static int start_x_position = 0;
         public static int start_y_position = 0;
-        private static Tile[,] dungeon_matrix;
+        public static Tile[,] dungeon_matrix;
 
         public static void initializeDungeon() {
             rooms_in_dungeon = new List<Room>();
@@ -53,7 +53,7 @@ namespace DungeonGenerator {
         }
 
         public static void saveDungeonFile() {
-            string path = @"saveFile.txt";
+            string path = @"saveFile.bin";
             int dungeon_width = max_x_position - min_x_position;
             int dungeon_height = max_y_position - min_y_position;
             setStartingPosition();
