@@ -58,6 +58,7 @@ namespace DungeonGenerator {
             int dungeon_height = max_y_position - min_y_position;
             setStartingPosition();
             Tile blank_tile = new Tile();
+            blank_tile.inside = 0;
 
             setDungeonMatrix();
             using (BinaryWriter bw = new BinaryWriter(File.Open(path, FileMode.Create))) {
@@ -68,11 +69,13 @@ namespace DungeonGenerator {
                 for (int y = 0; y < dungeon_height; y++) {
                     for (int x = 0; x < dungeon_width; x++) {
                         if (dungeon_matrix[x, y] != null) {
+                            bw.Write(dungeon_matrix[x, y].inside);
                             bw.Write(dungeon_matrix[x, y].up);
                             bw.Write(dungeon_matrix[x, y].right);
                             bw.Write(dungeon_matrix[x, y].down);
                             bw.Write(dungeon_matrix[x, y].left);
                         } else {
+                            bw.Write(blank_tile.inside);
                             bw.Write(blank_tile.up);
                             bw.Write(blank_tile.right);
                             bw.Write(blank_tile.down);

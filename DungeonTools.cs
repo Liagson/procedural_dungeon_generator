@@ -147,25 +147,19 @@ namespace DungeonGenerator {
 
             room.floor[pillarTile].up = 1;
             room.floor[pillarTile].left = 1;
-            room.floor[pillarTile].down = 1;
-            room.floor[pillarTile].right = 1;
+            room.floor[pillarTile].inside = 0;
 
             room.floor[pillarTile + 1].up = 1;
             room.floor[pillarTile + 1].right = 1;
-            room.floor[pillarTile + 1].down = 1;
-            room.floor[pillarTile + 1].left = 1;
+            room.floor[pillarTile + 1].inside = 0;
 
             room.floor[pillarTile + room.width].down = 1;
             room.floor[pillarTile + room.width].left = 1;
-            room.floor[pillarTile + room.width].up = 1;
-            room.floor[pillarTile + room.width].right = 1;
+            room.floor[pillarTile + room.width].inside = 0;
 
             room.floor[pillarTile + room.width + 1].down = 1;
             room.floor[pillarTile + room.width + 1].right = 1;
-            room.floor[pillarTile + room.width + 1].up = 1;
-            room.floor[pillarTile + room.width + 1].left = 1;
-
-            //setWallAroundObject(room, room.position_x + room_x_position, room.position_y + room_y_position, 2, 2);
+            room.floor[pillarTile + room.width + 1].inside = 0;
         }
 
         static public void addPillarsToRoom(Room room, System.Random pseudorandom) {
