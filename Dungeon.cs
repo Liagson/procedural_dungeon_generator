@@ -111,8 +111,8 @@ namespace DungeonGenerator {
             while (rooms_in_dungeon[room].isBumpRoom) {
                 room -= 1;
             }
-            start_x_position = rooms_in_dungeon[room].position_x;
-            start_y_position = rooms_in_dungeon[room].position_y;
+            start_x_position = rooms_in_dungeon[room].position_x - min_x_position;
+            start_y_position = rooms_in_dungeon[room].position_y - min_y_position;
         }
     }
 }
