@@ -302,7 +302,7 @@ namespace DungeonGenerator {
                     door_set = setDoorInInnerRoom(room, innerRoom, Navigation.pseudoRandom);
                     if (door_set) {
                         room.inner_rooms.Add(Dungeon.rooms_in_dungeon.Count);
-                        //setWallAroundObject(room, innerRoom.position_x, innerRoom.position_y, innerRoom.width, innerRoom.height);
+                        setWallAroundObject(room, innerRoom.position_x, innerRoom.position_y, innerRoom.width, innerRoom.height); //?
                         Dungeon.rooms_in_dungeon.Add(innerRoom);
                     }
                 }
